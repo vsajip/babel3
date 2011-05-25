@@ -19,9 +19,11 @@ from difflib import get_close_matches
 from email import message_from_string
 from copy import copy
 import re
+import sys
 import time
 
 from babel import __version__ as VERSION
+from babel.compat import u, string_types
 from babel.core import Locale
 from babel.dates import format_datetime
 from babel.messages.plurals import get_plural
@@ -46,7 +48,7 @@ PYTHON_FORMAT = re.compile(r'''(?x)
 class Message(object):
     """Representation of a single message in a catalog."""
 
-    def __init__(self, id, string=u'', locations=(), flags=(), auto_comments=(),
+    def __init__(self, id, string=u(''), locations=(), flags=(), auto_comments=(),
                  user_comments=(), previous_id=(), lineno=None, context=None):
         """Create the message object.
 
@@ -66,7 +68,7 @@ class Message(object):
         """
         self.id = id #: The message ID
         if not string and self.pluralizable:
-            string = (u'', u'')
+            string = (u(''), u(''))
         self.string = string #: The message translation
         self.locations = list(distinct(locations))
         self.flags = set(flags)
@@ -76,7 +78,7 @@ class Message(object):
             self.flags.discard('python-format')
         self.auto_comments = list(distinct(auto_comments))
         self.user_comments = list(distinct(user_comments))
-        if isinstance(previous_id, basestring):
+        if isinstance(previous_id, string_types):
             self.previous_id = [previous_id]
         else:
             self.previous_id = list(previous_id)
@@ -101,10 +103,10 @@ class Message(object):
         return cmp(self.id, obj.id)
 
     def clone(self):
-        return Message(*map(copy, (self.id, self.string, self.locations,
+        return Message(*tuple(map(copy, (self.id, self.string, self.locations,
                                    self.flags, self.auto_comments,
                                    self.user_comments, self.previous_id,
-                                   self.lineno, self.context)))
+                                   self.lineno, self.context))))
 
     def check(self, catalog=None):
         """Run various validation checks on the message.  Some validations
@@ -121,8 +123,8 @@ class Message(object):
         for checker in checkers:
             try:
                 checker(catalog, self)
-            except TranslationError, e:
-                errors.append(e)
+            except TranslationError:
+                errors.append(sys.exc_info()[1])
         return errors
 
     def fuzzy(self):
@@ -158,7 +160,7 @@ class Message(object):
         ids = self.id
         if not isinstance(ids, (list, tuple)):
             ids = [ids]
-        return bool(filter(None, [PYTHON_FORMAT.search(id) for id in ids]))
+        return bool([_f for _f in [PYTHON_FORMAT.search(id) for id in ids] if _f])
     python_format = property(python_format, doc="""\
         Whether the message contains Python-style parameters.
 
@@ -176,12 +178,12 @@ class TranslationError(Exception):
     translations are encountered."""
 
 
-DEFAULT_HEADER = u"""\
+DEFAULT_HEADER = u("""\
 # Translations template for PROJECT.
 # Copyright (C) YEAR ORGANIZATION
 # This file is distributed under the same license as the PROJECT project.
 # FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
-#"""
+#""")
 
 
 class Catalog(object):
@@ -327,7 +329,7 @@ class Catalog(object):
             name = name.lower()
             if name == 'project-id-version':
                 parts = value.split(' ')
-                self.project = u' '.join(parts[:-1])
+                self.project = u(' ').join(parts[:-1])
                 self.version = parts[-1]
             elif name == 'report-msgid-bugs-to':
                 self.msgid_bugs_address = value
@@ -523,7 +525,7 @@ class Catalog(object):
         flags = set()
         if self.fuzzy:
             flags |= set(['fuzzy'])
-        yield Message(u'', '\n'.join(buf), flags=flags)
+        yield Message(u(''), '\n'.join(buf), flags=flags)
         for key in self._messages:
             yield self._messages[key]
 
@@ -596,7 +598,7 @@ class Catalog(object):
                     value = value.decode('utf8')
                     decoded_headers[name] = value
                 return decoded_headers
-            self.mime_headers = _parse_header(message.string).items()
+            self.mime_headers = list(_parse_header(message.string).items())
             self.header_comment = '\n'.join(['# %s' % comment for comment
                                              in message.user_comments])
             self.fuzzy = message.fuzzy
@@ -749,7 +751,7 @@ class Catalog(object):
                 fuzzy = True
                 fuzzy_matches.add(oldkey)
                 oldmsg = messages.get(oldkey)
-                if isinstance(oldmsg.id, basestring):
+                if isinstance(oldmsg.id, string_types):
                     message.previous_id = [oldmsg.id]
                 else:
                     message.previous_id = list(oldmsg.id)
@@ -760,7 +762,7 @@ class Catalog(object):
                 if not isinstance(message.string, (list, tuple)):
                     fuzzy = True
                     message.string = tuple(
-                        [message.string] + ([u''] * (len(message.id) - 1))
+                        [message.string] + ([u('')] * (len(message.id) - 1))
                     )
                 elif len(message.string) != self.num_plurals:
                     fuzzy = True
@@ -770,7 +772,7 @@ class Catalog(object):
                 message.string = message.string[0]
             message.flags |= oldmsg.flags
             if fuzzy:
-                message.flags |= set([u'fuzzy'])
+                message.flags |= set([u('fuzzy')])
             self[message.id] = message
 
         for message in template:
@@ -786,7 +788,7 @@ class Catalog(object):
                         else:
                             matchkey = key
                         matches = get_close_matches(matchkey.lower().strip(),
-                                                    fuzzy_candidates.keys(), 1)
+                                                    list(fuzzy_candidates.keys()), 1)
                         if matches:
                             newkey = matches[0]
                             newctxt = fuzzy_candidates[newkey]

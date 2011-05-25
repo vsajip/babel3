@@ -14,7 +14,7 @@
 """Core locale representation and locale data access."""
 
 import os
-import cPickle as pickle
+from babel.compat import pickle, string_types, u
 
 from babel import localedata
 
@@ -208,7 +208,7 @@ class Locale(object):
                                      requested locale
         :see: `parse_locale`
         """
-        if isinstance(identifier, basestring):
+        if isinstance(identifier, string_types):
             return cls(*parse_locale(identifier, sep=sep))
         return identifier
     parse = classmethod(parse)
@@ -223,8 +223,8 @@ class Locale(object):
         return '<Locale "%s">' % str(self)
 
     def __str__(self):
-        return '_'.join(filter(None, [self.language, self.script,
-                                      self.territory, self.variant]))
+        return '_'.join([_f for _f in [self.language, self.script,
+                                      self.territory, self.variant] if _f])
 
     def _data(self):
         if self.__data is None:
@@ -256,9 +256,9 @@ class Locale(object):
                 details.append(locale.territories.get(self.territory))
             if self.variant:
                 details.append(locale.variants.get(self.variant))
-            details = filter(None, details)
+            details = [_f for _f in details if _f]
             if details:
-                retval += ' (%s)' % u', '.join(details)
+                retval += ' (%s)' % u(', ').join(details)
         return retval
 
     display_name = property(get_display_name, doc="""\
@@ -648,7 +648,8 @@ def default_locale(category=None, aliases=LOCALE_ALIASES):
     :rtype: `str`
     """
     varnames = (category, 'LANGUAGE', 'LC_ALL', 'LC_CTYPE', 'LANG')
-    for name in filter(None, varnames):
+    for name in varnames:
+        if not name: continue
         locale = os.getenv(name)
         if locale:
             if name == 'LANGUAGE' and ':' in locale:
@@ -660,7 +661,7 @@ def default_locale(category=None, aliases=LOCALE_ALIASES):
             elif aliases and locale in aliases:
                 locale = aliases[locale]
             try:
-                return '_'.join(filter(None, parse_locale(locale)))
+                return '_'.join([_f for _f in parse_locale(locale) if _f])
             except ValueError:
                 pass
 

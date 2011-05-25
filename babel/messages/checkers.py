@@ -16,7 +16,7 @@
 :since: version 0.9
 """
 
-from itertools import izip
+from babel.compat import string_types, izip
 from babel.messages.catalog import TranslationError, PYTHON_FORMAT
 
 #: list of format chars that are compatible to each other
@@ -30,7 +30,7 @@ _string_format_compatibilities = [
 def num_plurals(catalog, message):
     """Verify the number of plurals in the translation."""
     if not message.pluralizable:
-        if not isinstance(message.string, basestring):
+        if not isinstance(message.string, string_types):
             raise TranslationError("Found plural forms for non-pluralizable "
                                    "message")
         return
@@ -124,10 +124,10 @@ def _validate_format(format, alternative):
                                            'and named placeholders')
         return bool(positional)
 
-    a, b = map(_parse, (format, alternative))
+    a, b = tuple(map(_parse, (format, alternative)))
 
     # now check if both strings are positional or named
-    a_positional, b_positional = map(_check_positional, (a, b))
+    a_positional, b_positional = tuple(map(_check_positional, (a, b)))
     if a_positional and not b_positional and not b:
         raise TranslationError('placeholders are incompatible')
     elif a_positional != b_positional:

@@ -60,7 +60,7 @@ def _strip_comment_tags(comments, tags):
             if line.startswith(tag):
                 return line[len(tag):].strip()
         return line
-    comments[:] = map(_strip, comments)
+    comments[:] = list(map(_strip, comments))
 
 
 def extract_from_dir(dirname=os.getcwd(), method_map=DEFAULT_MAPPING,
@@ -265,7 +265,7 @@ def extract(method, fileobj, keywords=DEFAULT_KEYWORDS, comment_tags=(),
     if func is None:
         raise ValueError('Unknown extraction method %r' % method)
 
-    results = func(fileobj, keywords.keys(), comment_tags,
+    results = func(fileobj, list(keywords.keys()), comment_tags,
                    options=options or {})
 
     for lineno, funcname, messages, comments in results:
@@ -301,7 +301,8 @@ def extract(method, fileobj, keywords=DEFAULT_KEYWORDS, comment_tags=(),
             # An empty string msgid isn't valid, emit a warning
             where = '%s:%i' % (hasattr(fileobj, 'name') and \
                                    fileobj.name or '(unknown)', lineno)
-            print >> sys.stderr, empty_msgid_warning % where
+            sys.stderr.write(empty_msgid_warning % where)
+            sys.stderr.write('\n')
             continue
 
         messages = tuple(msgs)

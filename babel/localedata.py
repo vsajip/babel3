@@ -18,12 +18,11 @@
 """
 
 import os
-import cPickle as pickle
+from babel.compat import pickle, DictMixin
 try:
     import threading
 except ImportError:
     import dummy_threading as threading
-from UserDict import DictMixin
 
 __all__ = ['exists', 'locale_identifiers', 'load']
 __docformat__ = 'restructuredtext en'

@@ -14,9 +14,9 @@
 from datetime import datetime
 import time
 import unittest
-from StringIO import StringIO
 
 from babel import __version__ as VERSION
+from babel.compat import StringIO
 from babel.core import Locale, UnknownLocaleError
 from babel.dates import format_datetime
 from babel.messages import checkers

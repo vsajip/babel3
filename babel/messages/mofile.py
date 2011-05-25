@@ -21,14 +21,15 @@
 import array
 import struct
 
+from babel.compat import long_type, xrange
 from babel.messages.catalog import Catalog, Message
 
 __all__ = ['read_mo', 'write_mo']
 __docformat__ = 'restructuredtext en'
 
 
-LE_MAGIC = 0x950412deL
-BE_MAGIC = 0xde120495L
+LE_MAGIC = long_type(0x950412de)
+BE_MAGIC = long_type(0xde120495)
 
 def read_mo(fileobj):
     """Read a binary MO file from the given file-like object and return a
@@ -112,7 +113,7 @@ def read_mo(fileobj):
         origidx += 8
         transidx += 8
 
-    catalog.mime_headers = headers.items()
+    catalog.mime_headers = list(headers.items())
     return catalog
 
 def write_mo(fileobj, catalog, use_fuzzy=False):

@@ -13,10 +13,10 @@
 
 import doctest
 import os
-from StringIO import StringIO
 import unittest
 
 from babel import support
+from babel.compat import StringIO, u
 from babel.messages import Catalog
 from babel.messages.mofile import write_mo
 
@@ -64,8 +64,8 @@ class TranslationsTestCase(unittest.TestCase):
                                                                      'foo'))
 
     def test_upgettext(self):
-        self.assertEqualTypeToo(u'Voh', self.translations.ugettext('foo'))
-        self.assertEqualTypeToo(u'VohCTX', self.translations.upgettext('foo',
+        self.assertEqualTypeToo(u('Voh'), self.translations.ugettext('foo'))
+        self.assertEqualTypeToo(u('VohCTX'), self.translations.upgettext('foo',
                                                                        'foo'))
 
     def test_lpgettext(self):
@@ -86,14 +86,14 @@ class TranslationsTestCase(unittest.TestCase):
                                                             'foos1', 2))
 
     def test_unpgettext(self):
-        self.assertEqualTypeToo(u'Voh1',
+        self.assertEqualTypeToo(u('Voh1'),
                                 self.translations.ungettext('foo1', 'foos1', 1))
-        self.assertEqualTypeToo(u'Vohs1',
+        self.assertEqualTypeToo(u('Vohs1'),
                                 self.translations.ungettext('foo1', 'foos1', 2))
-        self.assertEqualTypeToo(u'VohCTX1',
+        self.assertEqualTypeToo(u('VohCTX1'),
                                 self.translations.unpgettext('foo', 'foo1',
                                                              'foos1', 1))
-        self.assertEqualTypeToo(u'VohsCTX1',
+        self.assertEqualTypeToo(u('VohsCTX1'),
                                 self.translations.unpgettext('foo', 'foo1',
                                                              'foos1', 2))
 
@@ -117,9 +117,9 @@ class TranslationsTestCase(unittest.TestCase):
 
     def test_dupgettext(self):
         self.assertEqualTypeToo(
-            u'VohD', self.translations.dugettext('messages1', 'foo'))
+            u('VohD'), self.translations.dugettext('messages1', 'foo'))
         self.assertEqualTypeToo(
-            u'VohCTXD', self.translations.dupgettext('messages1', 'foo', 'foo'))
+            u('VohCTXD'), self.translations.dupgettext('messages1', 'foo', 'foo'))
 
     def test_ldpgettext(self):
         self.assertEqualTypeToo(
@@ -141,14 +141,14 @@ class TranslationsTestCase(unittest.TestCase):
 
     def test_dunpgettext(self):
         self.assertEqualTypeToo(
-            u'VohD1', self.translations.dungettext('messages1', 'foo1', 'foos1', 1))
+            u('VohD1'), self.translations.dungettext('messages1', 'foo1', 'foos1', 1))
         self.assertEqualTypeToo(
-            u'VohsD1', self.translations.dungettext('messages1', 'foo1', 'foos1', 2))
+            u('VohsD1'), self.translations.dungettext('messages1', 'foo1', 'foos1', 2))
         self.assertEqualTypeToo(
-            u'VohCTXD1', self.translations.dunpgettext('messages1', 'foo', 'foo1',
+            u('VohCTXD1'), self.translations.dunpgettext('messages1', 'foo', 'foo1',
                                                        'foos1', 1))
         self.assertEqualTypeToo(
-            u'VohsCTXD1', self.translations.dunpgettext('messages1', 'foo', 'foo1',
+            u('VohsCTXD1'), self.translations.dunpgettext('messages1', 'foo', 'foo1',
                                                         'foos1', 2))
 
     def test_ldnpgettext(self):

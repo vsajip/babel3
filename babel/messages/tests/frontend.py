@@ -19,12 +19,12 @@ import doctest
 import logging
 import os
 import shutil
-from StringIO import StringIO
 import sys
 import time
 import unittest
 
 from babel import __version__ as VERSION
+from babel.compat import StringIO
 from babel.dates import format_datetime
 from babel.messages import frontend
 from babel.util import LOCALTZ
@@ -540,7 +540,8 @@ class CommandLineInterfaceTestCase(unittest.TestCase):
         try:
             self.cli.run(sys.argv)
             self.fail('Expected SystemExit')
-        except SystemExit, e:
+        except SystemExit:
+            e = sys.exc_info()[1]
             self.assertEqual(2, e.code)
             self.assertEqual("""\
 usage: pybabel command [options] [args]
@@ -579,7 +580,8 @@ pybabel: error: no valid command or option passed. try the -h/--help option for 
         try:
             self.cli.run(sys.argv + ['--help'])
             self.fail('Expected SystemExit')
-        except SystemExit, e:
+        except SystemExit:
+            e = sys.exc_info()[1]
             self.assertEqual(0, e.code)
             self.assertEqual("""\
 usage: pybabel command [options] [args]

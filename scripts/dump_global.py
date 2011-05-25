@@ -12,12 +12,12 @@
 # individuals. For the exact contribution history, see the revision
 # history and logs, available at http://babel.edgewall.org/log/.
 
-import cPickle as pickle
 import os
 from pprint import pprint
 import sys
 
 import babel
+from babel.compat import pickle
 
 dirname = os.path.join(os.path.dirname(babel.__file__))
 filename = os.path.join(dirname, 'global.dat')

@@ -18,6 +18,8 @@ extractor.
 from operator import itemgetter
 import re
 
+from babel.compat import unichr, u
+
 operators = [
     '+', '-', '*', '%', '!=', '==', '<', '>', '<=', '>=', '=',
     '+=', '-=', '*=', '%=', '<<', '>>', '>>>', '<<=', '>>=',
@@ -130,7 +132,7 @@ def unquote_string(string):
     if pos < len(string):
         add(string[pos:])
 
-    return u''.join(result)
+    return u('').join(result)
 
 
 def tokenize(source):

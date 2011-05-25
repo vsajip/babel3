@@ -19,7 +19,8 @@ import os
 import re
 import textwrap
 import time
-from itertools import izip, imap
+
+from babel.compat import PY3
 
 missing = object()
 
@@ -205,10 +206,17 @@ class odict(dict):
         return d
 
     def items(self):
-        return zip(self._keys, self.values())
+        if PY3:
+            return list(zip(self._keys, list(self.values())))
+        else:
+            return zip(self._keys, self.values())
 
     def iteritems(self):
-        return izip(self._keys, self.itervalues())
+        if PY3:
+            return zip(self._keys, iter(self.values()))
+        else:
+            from itertools import izip
+            return izip(self._keys, self.itervalues())
 
     def keys(self):
         return self._keys[:]
@@ -235,10 +243,17 @@ class odict(dict):
             self[key] = val
 
     def values(self):
-        return map(self.get, self._keys)
+        if PY3:
+            return list(map(self.get, self._keys))
+        else:
+            return map(self.get, self._keys)
 
     def itervalues(self):
-        return imap(self.get, self._keys)
+        if PY3:
+            return map(self.get, self._keys)
+        else:
+            from itertools import imap
+            return imap(self.get, self._keys)
 
 
 try:

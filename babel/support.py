@@ -21,6 +21,7 @@ from datetime import date, datetime, timedelta
 import gettext
 import locale
 
+from babel.compat import text_type
 from babel.core import Locale
 from babel.dates import format_date, format_datetime, format_time, \
                         format_timedelta
@@ -205,6 +206,8 @@ class LazyProxy(object):
     def __nonzero__(self):
         return bool(self.value)
 
+    __bool__ = __nonzero__
+
     def __dir__(self):
         return dir(self.value)
 
@@ -218,7 +221,7 @@ class LazyProxy(object):
         return str(self.value)
 
     def __unicode__(self):
-        return unicode(self.value)
+        return text_type(self.value)
 
     def __add__(self, other):
         return self.value + other
@@ -290,7 +293,7 @@ class Translations(gettext.GNUTranslations, object):
                         from
         """
         gettext.GNUTranslations.__init__(self, fp=fileobj)
-        self.files = filter(None, [getattr(fileobj, 'name', None)])
+        self.files = self.files = [_f for _f in [getattr(fileobj, 'name', None)] if _f]
         self.domain = domain
         self._domains = {}
 
@@ -510,7 +513,7 @@ class Translations(gettext.GNUTranslations, object):
         if tmsg is missing:
             if self._fallback:
                 return self._fallback.upgettext(context, message)
-            return unicode(message)
+            return text_type(message)
         return tmsg
 
     def unpgettext(self, context, singular, plural, num):
@@ -531,9 +534,9 @@ class Translations(gettext.GNUTranslations, object):
             if self._fallback:
                 return self._fallback.unpgettext(context, singular, plural, num)
             if num == 1:
-                tmsg = unicode(singular)
+                tmsg = text_type(singular)
             else:
-                tmsg = unicode(plural)
+                tmsg = text_type(plural)
         return tmsg
 
     def dpgettext(self, domain, context, message):

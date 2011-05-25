@@ -14,7 +14,6 @@
 
 """Frontends for the message extraction functionality."""
 
-from ConfigParser import RawConfigParser
 from datetime import datetime
 from distutils import log
 from distutils.cmd import Command
@@ -24,12 +23,12 @@ import logging
 from optparse import OptionParser
 import os
 import shutil
-from StringIO import StringIO
 import sys
 import tempfile
 
 from babel import __version__ as VERSION
 from babel import Locale, localedata
+from babel.compat import RawConfigParser, StringIO, string_types, u
 from babel.core import UnknownLocaleError
 from babel.messages.catalog import Catalog
 from babel.messages.extract import extract_from_dir, DEFAULT_KEYWORDS, \
@@ -275,9 +274,9 @@ class extract_messages(Command):
                                        "are mutually exclusive")
 
         if not self.input_dirs:
-            self.input_dirs = dict.fromkeys([k.split('.',1)[0]
+            self.input_dirs = list(dict.fromkeys([k.split('.',1)[0]
                 for k in self.distribution.packages
-            ]).keys()
+            ]).keys())
 
         if self.add_comments:
             self._add_comments = self.add_comments.split(',')
@@ -338,7 +337,7 @@ class extract_messages(Command):
         elif getattr(self.distribution, 'message_extractors', None):
             message_extractors = self.distribution.message_extractors
             for dirname, mapping in message_extractors.items():
-                if isinstance(mapping, basestring):
+                if isinstance(mapping, string_types):
                     method_map, options_map = parse_mapping(StringIO(mapping))
                 else:
                     method_map, options_map = [], {}
@@ -420,8 +419,8 @@ class init_catalog(Command):
                                        'new catalog')
         try:
             self._locale = Locale.parse(self.locale)
-        except UnknownLocaleError, e:
-            raise DistutilsOptionError(e)
+        except UnknownLocaleError:
+            raise DistutilsOptionError(sys.exc_info()[1])
 
         if not self.output_file and not self.output_dir:
             raise DistutilsOptionError('you must specify the output directory')
@@ -629,13 +628,13 @@ class CommandLineInterface(object):
             identifiers = localedata.locale_identifiers()
             longest = max([len(identifier) for identifier in identifiers])
             identifiers.sort()
-            format = u'%%-%ds %%s' % (longest + 1)
+            format = u('%%-%ds %%s') % (longest + 1)
             for identifier in identifiers:
                 locale = Locale.parse(identifier)
                 output = format % (identifier, locale.english_name)
-                print output.encode(sys.stdout.encoding or
+                print(output.encode(sys.stdout.encoding or
                                     getpreferredencoding() or
-                                    'ascii', 'replace')
+                                    'ascii', 'replace'))
             return 0
 
         if not args:
@@ -664,14 +663,14 @@ class CommandLineInterface(object):
         handler.setFormatter(formatter)
 
     def _help(self):
-        print self.parser.format_help()
-        print "commands:"
+        print(self.parser.format_help())
+        print("commands:")
         longest = max([len(command) for command in self.commands])
         format = "  %%-%ds %%s" % max(8, longest + 1)
         commands = self.commands.items()
         commands.sort()
         for name, description in commands:
-            print format % (name, description)
+            print(format % (name, description))
 
     def compile(self, argv):
         """Subcommand for compiling a message catalog to a MO file.
@@ -951,8 +950,8 @@ class CommandLineInterface(object):
             parser.error('you must provide a locale for the new catalog')
         try:
             locale = Locale.parse(options.locale)
-        except UnknownLocaleError, e:
-            parser.error(e)
+        except UnknownLocaleError:
+            parser.error(sys.exc_info()[1])
 
         if not options.input_file:
             parser.error('you must specify the input file')
