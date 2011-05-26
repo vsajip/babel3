@@ -142,11 +142,21 @@ class FormatDecimalTestCase(unittest.TestCase):
         fmt = numbers.format_scientific(0, '#E0', locale='en_US')
         self.assertEqual(fmt, '0E0')
 
+    def test_invalid(self):
+        self.assertRaises(numbers.NumberFormatError,
+                          numbers.parse_number, '1.099,98', locale='de')
+    
+class FormatNumberTestCase(unittest.TestCase):
+    def test_invalid(self):
+        self.assertRaises(numbers.NumberFormatError,
+                          numbers.parse_decimal, '2,109,998', locale='de')
+
 
 def suite():
     suite = unittest.TestSuite()
     suite.addTest(doctest.DocTestSuite(numbers))
     suite.addTest(unittest.makeSuite(FormatDecimalTestCase))
+    suite.addTest(unittest.makeSuite(FormatNumberTestCase))
     return suite
 
 if __name__ == '__main__':

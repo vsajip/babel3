@@ -43,8 +43,8 @@ time_ = time
 def get_period_names(locale=LC_TIME):
     """Return the names for day periods (AM/PM) used by the locale.
     
-    >>> get_period_names(locale='en_US')['am']
-    u'AM'
+    >>> get_period_names(locale='en_US')['am'] == u('AM')
+    True
     
     :param locale: the `Locale` object, or a locale string
     :return: the dictionary of period names
@@ -55,12 +55,12 @@ def get_period_names(locale=LC_TIME):
 def get_day_names(width='wide', context='format', locale=LC_TIME):
     """Return the day names used by the locale for the specified format.
     
-    >>> get_day_names('wide', locale='en_US')[1]
-    u'Tuesday'
-    >>> get_day_names('abbreviated', locale='es')[1]
-    u'mar'
-    >>> get_day_names('narrow', context='stand-alone', locale='de_DE')[1]
-    u'D'
+    >>> get_day_names('wide', locale='en_US')[1] == u('Tuesday')
+    True
+    >>> get_day_names('abbreviated', locale='es')[1] == u('mar')
+    True
+    >>> get_day_names('narrow', context='stand-alone', locale='de_DE')[1] == u('D')
+    True
     
     :param width: the width to use, one of "wide", "abbreviated", or "narrow"
     :param context: the context, either "format" or "stand-alone"
@@ -73,12 +73,12 @@ def get_day_names(width='wide', context='format', locale=LC_TIME):
 def get_month_names(width='wide', context='format', locale=LC_TIME):
     """Return the month names used by the locale for the specified format.
     
-    >>> get_month_names('wide', locale='en_US')[1]
-    u'January'
-    >>> get_month_names('abbreviated', locale='es')[1]
-    u'ene'
-    >>> get_month_names('narrow', context='stand-alone', locale='de_DE')[1]
-    u'J'
+    >>> get_month_names('wide', locale='en_US')[1] == u('January')
+    True
+    >>> get_month_names('abbreviated', locale='es')[1] == u('ene')
+    True
+    >>> get_month_names('narrow', context='stand-alone', locale='de_DE')[1] == u('J')
+    True
     
     :param width: the width to use, one of "wide", "abbreviated", or "narrow"
     :param context: the context, either "format" or "stand-alone"
@@ -91,10 +91,10 @@ def get_month_names(width='wide', context='format', locale=LC_TIME):
 def get_quarter_names(width='wide', context='format', locale=LC_TIME):
     """Return the quarter names used by the locale for the specified format.
     
-    >>> get_quarter_names('wide', locale='en_US')[1]
-    u'1st quarter'
-    >>> get_quarter_names('abbreviated', locale='de_DE')[1]
-    u'Q1'
+    >>> get_quarter_names('wide', locale='en_US')[1] == u('1st quarter')
+    True
+    >>> get_quarter_names('abbreviated', locale='de_DE')[1] == u('Q1')
+    True
     
     :param width: the width to use, one of "wide", "abbreviated", or "narrow"
     :param context: the context, either "format" or "stand-alone"
@@ -107,10 +107,10 @@ def get_quarter_names(width='wide', context='format', locale=LC_TIME):
 def get_era_names(width='wide', locale=LC_TIME):
     """Return the era names used by the locale for the specified format.
     
-    >>> get_era_names('wide', locale='en_US')[1]
-    u'Anno Domini'
-    >>> get_era_names('abbreviated', locale='de_DE')[1]
-    u'n. Chr.'
+    >>> get_era_names('wide', locale='en_US')[1] == u('Anno Domini')
+    True
+    >>> get_era_names('abbreviated', locale='de_DE')[1] == u('n. Chr.')
+    True
     
     :param width: the width to use, either "wide", "abbreviated", or "narrow"
     :param locale: the `Locale` object, or a locale string
@@ -124,9 +124,9 @@ def get_date_format(format='medium', locale=LC_TIME):
     format.
     
     >>> get_date_format(locale='en_US')
-    <DateTimePattern u'MMM d, y'>
+    <DateTimePattern MMM d, y>
     >>> get_date_format('full', locale='de_DE')
-    <DateTimePattern u'EEEE, d. MMMM y'>
+    <DateTimePattern EEEE, d. MMMM y>
     
     :param format: the format to use, one of "full", "long", "medium", or
                    "short"
@@ -140,8 +140,8 @@ def get_datetime_format(format='medium', locale=LC_TIME):
     """Return the datetime formatting patterns used by the locale for the
     specified format.
     
-    >>> get_datetime_format(locale='en_US')
-    u'{1} {0}'
+    >>> get_datetime_format(locale='en_US') == u('{1} {0}')
+    True
     
     :param format: the format to use, one of "full", "long", "medium", or
                    "short"
@@ -159,9 +159,9 @@ def get_time_format(format='medium', locale=LC_TIME):
     format.
     
     >>> get_time_format(locale='en_US')
-    <DateTimePattern u'h:mm:ss a'>
+    <DateTimePattern h:mm:ss a>
     >>> get_time_format('full', locale='de_DE')
-    <DateTimePattern u'HH:mm:ss zzzz'>
+    <DateTimePattern HH:mm:ss zzzz>
     
     :param format: the format to use, one of "full", "long", "medium", or
                    "short"
@@ -176,22 +176,22 @@ def get_timezone_gmt(datetime=None, width='long', locale=LC_TIME):
     as string indicating the offset from GMT.
     
     >>> dt = datetime(2007, 4, 1, 15, 30)
-    >>> get_timezone_gmt(dt, locale='en')
-    u'GMT+00:00'
+    >>> get_timezone_gmt(dt, locale='en') == u('GMT+00:00')
+    True
     
     >>> from pytz import timezone
     >>> tz = timezone('America/Los_Angeles')
     >>> dt = datetime(2007, 4, 1, 15, 30, tzinfo=tz)
-    >>> get_timezone_gmt(dt, locale='en')
-    u'GMT-08:00'
-    >>> get_timezone_gmt(dt, 'short', locale='en')
-    u'-0800'
+    >>> get_timezone_gmt(dt, locale='en') == u('GMT-08:00')
+    True
+    >>> get_timezone_gmt(dt, 'short', locale='en') == u('-0800')
+    True
     
     The long format depends on the locale, for example in France the acronym
     UTC string is used instead of GMT:
     
-    >>> get_timezone_gmt(dt, 'long', locale='fr_FR')
-    u'UTC-08:00'
+    >>> get_timezone_gmt(dt, 'long', locale='fr_FR') == u('UTC-08:00')
+    True
     
     :param datetime: the ``datetime`` object; if `None`, the current date and
                      time in UTC is used
@@ -226,18 +226,18 @@ def get_timezone_location(dt_or_tzinfo=None, locale=LC_TIME):
     
     >>> from pytz import timezone
     >>> tz = timezone('America/St_Johns')
-    >>> get_timezone_location(tz, locale='de_DE')
-    u"Kanada (St. John's)"
+    >>> get_timezone_location(tz, locale='de_DE') == u("Kanada (St. John's)")
+    True
     >>> tz = timezone('America/Mexico_City')
-    >>> get_timezone_location(tz, locale='de_DE')
-    u'Mexiko (Mexiko-Stadt)'
+    >>> get_timezone_location(tz, locale='de_DE') == u('Mexiko (Mexiko-Stadt)')
+    True
     
     If the timezone is associated with a country that uses only a single
     timezone, just the localized country name is returned:
     
     >>> tz = timezone('Europe/Berlin')
-    >>> get_timezone_name(tz, locale='de_DE')
-    u'Deutschland'
+    >>> get_timezone_name(tz, locale='de_DE') == u('Deutschland')
+    True
     
     :param dt_or_tzinfo: the ``datetime`` or ``tzinfo`` object that determines
                          the timezone; if `None`, the current date and time in
@@ -307,10 +307,10 @@ def get_timezone_name(dt_or_tzinfo=None, width='long', uncommon=False,
     
     >>> from pytz import timezone
     >>> dt = time(15, 30, tzinfo=timezone('America/Los_Angeles'))
-    >>> get_timezone_name(dt, locale='en_US')
-    u'Pacific Standard Time'
-    >>> get_timezone_name(dt, width='short', locale='en_US')
-    u'PST'
+    >>> get_timezone_name(dt, locale='en_US') == u('Pacific Standard Time')
+    True
+    >>> get_timezone_name(dt, width='short', locale='en_US') == u('PST')
+    True
     
     If this function gets passed only a `tzinfo` object and no concrete
     `datetime`,  the returned display name is indenpendent of daylight savings
@@ -318,27 +318,27 @@ def get_timezone_name(dt_or_tzinfo=None, width='long', uncommon=False,
     time of events that recur across DST changes:
     
     >>> tz = timezone('America/Los_Angeles')
-    >>> get_timezone_name(tz, locale='en_US')
-    u'Pacific Time'
-    >>> get_timezone_name(tz, 'short', locale='en_US')
-    u'PT'
+    >>> get_timezone_name(tz, locale='en_US') == u('Pacific Time')
+    True
+    >>> get_timezone_name(tz, 'short', locale='en_US') == u('PT')
+    True
     
     If no localized display name for the timezone is available, and the timezone
     is associated with a country that uses only a single timezone, the name of
     that country is returned, formatted according to the locale:
     
     >>> tz = timezone('Europe/Berlin')
-    >>> get_timezone_name(tz, locale='de_DE')
-    u'Deutschland'
-    >>> get_timezone_name(tz, locale='pt_BR')
-    u'Hor\xe1rio Alemanha'
+    >>> get_timezone_name(tz, locale='de_DE') == u('Deutschland')
+    True
+    >>> get_timezone_name(tz, locale='pt_BR') == u('Hor\xe1rio Alemanha')
+    True
     
     On the other hand, if the country uses multiple timezones, the city is also
     included in the representation:
     
     >>> tz = timezone('America/St_Johns')
-    >>> get_timezone_name(tz, locale='de_DE')
-    u"Kanada (St. John's)"
+    >>> get_timezone_name(tz, locale='de_DE') == u("Kanada (St. John's)")
+    True
     
     The `uncommon` parameter can be set to `True` to enable the use of timezone
     representations that are not commonly used by the requested locale. For
@@ -347,10 +347,10 @@ def get_timezone_name(dt_or_tzinfo=None, width='long', uncommon=False,
     common use, so a generic name would be chosen by default:
     
     >>> tz = timezone('Europe/Paris')
-    >>> get_timezone_name(tz, 'short', locale='fr_CA')
-    u'France'
-    >>> get_timezone_name(tz, 'short', uncommon=True, locale='fr_CA')
-    u'HEC'
+    >>> get_timezone_name(tz, 'short', locale='fr_CA') == u('France')
+    True
+    >>> get_timezone_name(tz, 'short', uncommon=True, locale='fr_CA') == u('HEC')
+    True
     
     :param dt_or_tzinfo: the ``datetime`` or ``tzinfo`` object that determines
                          the timezone; if a ``tzinfo`` object is used, the
@@ -425,17 +425,17 @@ def get_timezone_name(dt_or_tzinfo=None, width='long', uncommon=False,
 def format_date(date=None, format='medium', locale=LC_TIME):
     """Return a date formatted according to the given pattern.
     
-    >>> d = date(2007, 04, 01)
-    >>> format_date(d, locale='en_US')
-    u'Apr 1, 2007'
-    >>> format_date(d, format='full', locale='de_DE')
-    u'Sonntag, 1. April 2007'
+    >>> d = date(2007, 4, 1)
+    >>> format_date(d, locale='en_US') == u('Apr 1, 2007')
+    True
+    >>> format_date(d, format='full', locale='de_DE') == u('Sonntag, 1. April 2007')
+    True
     
     If you don't want to use the locale default formats, you can specify a
     custom date pattern:
     
-    >>> format_date(d, "EEE, MMM d, ''yy", locale='en')
-    u"Sun, Apr 1, '07"
+    >>> format_date(d, "EEE, MMM d, ''yy", locale='en') == u("Sun, Apr 1, '07")
+    True
     
     :param date: the ``date`` or ``datetime`` object; if `None`, the current
                  date is used
@@ -464,20 +464,20 @@ def format_datetime(datetime=None, format='medium', tzinfo=None,
                     locale=LC_TIME):
     r"""Return a date formatted according to the given pattern.
     
-    >>> dt = datetime(2007, 04, 01, 15, 30)
-    >>> format_datetime(dt, locale='en_US')
-    u'Apr 1, 2007 3:30:00 PM'
+    >>> dt = datetime(2007, 4, 1, 15, 30)
+    >>> format_datetime(dt, locale='en_US') == u('Apr 1, 2007 3:30:00 PM')
+    True
     
     For any pattern requiring the display of the time-zone, the third-party
     ``pytz`` package is needed to explicitly specify the time-zone:
     
     >>> from pytz import timezone
     >>> format_datetime(dt, 'full', tzinfo=timezone('Europe/Paris'),
-    ...                 locale='fr_FR')
-    u'dimanche 1 avril 2007 17:30:00 Heure avanc\xe9e de l\u2019Europe centrale'
+    ...                 locale='fr_FR') == u('dimanche 1 avril 2007 17:30:00 Heure avanc\xe9e de l\u2019Europe centrale')
+    True
     >>> format_datetime(dt, "yyyy.MM.dd G 'at' HH:mm:ss zzz",
-    ...                 tzinfo=timezone('US/Eastern'), locale='en')
-    u'2007.04.01 AD at 11:30:00 EDT'
+    ...                 tzinfo=timezone('US/Eastern'), locale='en') == u('2007.04.01 AD at 11:30:00 EDT')
+    True
     
     :param datetime: the `datetime` object; if `None`, the current date and
                      time is used
@@ -513,16 +513,16 @@ def format_time(time=None, format='medium', tzinfo=None, locale=LC_TIME):
     r"""Return a time formatted according to the given pattern.
     
     >>> t = time(15, 30)
-    >>> format_time(t, locale='en_US')
-    u'3:30:00 PM'
-    >>> format_time(t, format='short', locale='de_DE')
-    u'15:30'
+    >>> format_time(t, locale='en_US') == u('3:30:00 PM')
+    True
+    >>> format_time(t, format='short', locale='de_DE') == u('15:30')
+    True
     
     If you don't want to use the locale default formats, you can specify a
     custom time pattern:
     
-    >>> format_time(t, "hh 'o''clock' a", locale='en')
-    u"03 o'clock PM"
+    >>> format_time(t, "hh 'o''clock' a", locale='en') == u("03 o'clock PM")
+    True
     
     For any pattern requiring the display of the time-zone, the third-party
     ``pytz`` package is needed to explicitly specify the time-zone:
@@ -531,11 +531,11 @@ def format_time(time=None, format='medium', tzinfo=None, locale=LC_TIME):
     >>> t = datetime(2007, 4, 1, 15, 30)
     >>> tzinfo = timezone('Europe/Paris')
     >>> t = tzinfo.localize(t)
-    >>> format_time(t, format='full', tzinfo=tzinfo, locale='fr_FR')
-    u'15:30:00 Heure avanc\xe9e de l\u2019Europe centrale'
+    >>> format_time(t, format='full', tzinfo=tzinfo, locale='fr_FR') == u('15:30:00 Heure avanc\xe9e de l\u2019Europe centrale')
+    True
     >>> format_time(t, "hh 'o''clock' a, zzzz", tzinfo=timezone('US/Eastern'),
-    ...             locale='en')
-    u"09 o'clock AM, Eastern Daylight Time"
+    ...             locale='en') == u("09 o'clock AM, Eastern Daylight Time")
+    True
     
     As that example shows, when this function gets passed a
     ``datetime.datetime`` value, the actual time in the formatted string is
@@ -552,11 +552,11 @@ def format_time(time=None, format='medium', tzinfo=None, locale=LC_TIME):
     
     >>> t = time(15, 30)
     >>> format_time(t, format='full', tzinfo=timezone('Europe/Paris'),
-    ...             locale='fr_FR')
-    u'15:30:00 Heure normale de l\u2019Europe centrale'
+    ...             locale='fr_FR') == u('15:30:00 Heure normale de l\u2019Europe centrale')
+    True
     >>> format_time(t, format='full', tzinfo=timezone('US/Eastern'),
-    ...             locale='en_US')
-    u'3:30:00 PM Eastern Standard Time'
+    ...             locale='en_US') == u('3:30:00 PM Eastern Standard Time')
+    True
     
     :param time: the ``time`` or ``datetime`` object; if `None`, the current
                  time in UTC is used
@@ -604,26 +604,26 @@ TIMEDELTA_UNITS = (
 def format_timedelta(delta, granularity='second', threshold=.85, locale=LC_TIME):
     """Return a time delta according to the rules of the given locale.
 
-    >>> format_timedelta(timedelta(weeks=12), locale='en_US')
-    u'3 mths'
-    >>> format_timedelta(timedelta(seconds=1), locale='es')
-    u'1 s'
+    >>> format_timedelta(timedelta(weeks=12), locale='en_US') == u('3 mths')
+    True
+    >>> format_timedelta(timedelta(seconds=1), locale='es') == u('1 s')
+    True
 
     The granularity parameter can be provided to alter the lowest unit
     presented, which defaults to a second.
     
     >>> format_timedelta(timedelta(hours=3), granularity='day',
-    ...                  locale='en_US')
-    u'1 day'
+    ...                  locale='en_US') == u('1 day')
+    True
 
     The threshold parameter can be used to determine at which value the
     presentation switches to the next higher unit. A higher threshold factor
     means the presentation will switch later. For example:
 
-    >>> format_timedelta(timedelta(hours=23), threshold=0.9, locale='en_US')
-    u'1 day'
-    >>> format_timedelta(timedelta(hours=23), threshold=1.1, locale='en_US')
-    u'23 hrs'
+    >>> format_timedelta(timedelta(hours=23), threshold=0.9, locale='en_US') == u('1 day')
+    True
+    >>> format_timedelta(timedelta(hours=23), threshold=1.1, locale='en_US') == u('23 hrs')
+    True
 
     :param delta: a ``timedelta`` object representing the time difference to
                   format, or the delta in seconds as an `int` value
@@ -677,8 +677,7 @@ def parse_date(string, locale=LC_TIME):
         month_idx = format.index('l')
     day_idx = format.index('d')
 
-    indexes = [(year_idx, 'Y'), (month_idx, 'M'), (day_idx, 'D')]
-    indexes.sort()
+    indexes = sorted([(year_idx, 'Y'), (month_idx, 'M'), (day_idx, 'D')])
     indexes = dict([(item[1], idx) for idx, item in enumerate(indexes)])
 
     # FIXME: this currently only supports numbers, but should also support month
@@ -731,8 +730,7 @@ def parse_time(string, locale=LC_TIME):
     min_idx = format.index('m')
     sec_idx = format.index('s')
 
-    indexes = [(hour_idx, 'H'), (min_idx, 'M'), (sec_idx, 'S')]
-    indexes.sort()
+    indexes = sorted([(hour_idx, 'H'), (min_idx, 'M'), (sec_idx, 'S')])
     indexes = dict([(item[1], idx) for idx, item in enumerate(indexes)])
 
     # FIXME: support 12 hour clock, and 0-based hour specification
@@ -753,7 +751,7 @@ class DateTimePattern(object):
         self.format = format
 
     def __repr__(self):
-        return '<%s %r>' % (type(self).__name__, self.pattern)
+        return '<%s %s>' % (type(self).__name__, self.pattern)
 
     def __unicode__(self):
         return self.pattern
@@ -978,21 +976,21 @@ PATTERN_CHARS = {
 def parse_pattern(pattern):
     """Parse date, time, and datetime format patterns.
     
-    >>> parse_pattern("MMMMd").format
-    u'%(MMMM)s%(d)s'
-    >>> parse_pattern("MMM d, yyyy").format
-    u'%(MMM)s %(d)s, %(yyyy)s'
+    >>> parse_pattern("MMMMd").format == u('%(MMMM)s%(d)s')
+    True
+    >>> parse_pattern("MMM d, yyyy").format == u('%(MMM)s %(d)s, %(yyyy)s')
+    True
     
     Pattern can contain literal strings in single quotes:
     
-    >>> parse_pattern("H:mm' Uhr 'z").format
-    u'%(H)s:%(mm)s Uhr %(z)s'
+    >>> parse_pattern("H:mm' Uhr 'z").format == u('%(H)s:%(mm)s Uhr %(z)s')
+    True
     
     An actual single quote can be used by using two adjacent single quote
     characters:
     
-    >>> parse_pattern("hh' o''clock'").format
-    u"%(hh)s o'clock"
+    >>> parse_pattern("hh' o''clock'").format == u("%(hh)s o'clock")
+    True
     
     :param pattern: the formatting pattern to parse
     """

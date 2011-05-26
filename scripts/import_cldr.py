@@ -143,7 +143,7 @@ def main():
 
     filenames = os.listdir(os.path.join(srcdir, 'main'))
     filenames.remove('root.xml')
-    filenames.sort(lambda a,b: len(a)-len(b))
+    filenames.sort(key=lambda a: len(a))
     filenames.insert(0, 'root.xml')
 
     for filename in filenames:

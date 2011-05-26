@@ -31,7 +31,7 @@ try:
 except ImportError:
     have_decimal = False
 
-from babel.compat import u, b, long_type
+from babel.compat import u, b, long_type, PY3
 from babel.core import default_locale, Locale
 
 __all__ = ['format_number', 'format_decimal', 'format_currency',
@@ -266,13 +266,8 @@ def parse_number(string, locale=LC_NUMERIC):
     >>> parse_number('1.099', locale='de_DE') == long_type(1099)
     True
 
-    When the given string cannot be parsed, an exception is raised:
-    
-    >>> parse_number('1.099,98', locale='de')
-    Traceback (most recent call last):
-        ...
-    NumberFormatError: '1.099,98' is not a valid number
-    
+    When the given string cannot be parsed, a NumberFormatError is raised.
+
     :param string: the string to parse
     :param locale: the `Locale` object or locale identifier
     :return: the parsed number
@@ -292,12 +287,7 @@ def parse_decimal(string, locale=LC_NUMERIC):
     >>> parse_decimal('1.099,98', locale='de')
     1099.98
     
-    When the given string cannot be parsed, an exception is raised:
-    
-    >>> parse_decimal('2,109,998', locale='de')
-    Traceback (most recent call last):
-        ...
-    NumberFormatError: '2,109,998' is not a valid decimal number
+    When the given string cannot be parsed, a NumberFormatError is raised.
     
     :param string: the string to parse
     :param locale: the `Locale` object or locale identifier
@@ -473,7 +463,8 @@ class NumberPattern(object):
             self.scale = 1
 
     def __repr__(self):
-        return '<%s %r>' % (type(self).__name__, self.pattern)
+        pattern = self.pattern.encode('ascii', 'backslashreplace').decode('utf-8')
+        return '<%s %s>' % (type(self).__name__, pattern)
 
     def apply(self, value, locale, currency=None):
         value *= self.scale
@@ -489,7 +480,7 @@ class NumberPattern(object):
                 exp -= self.int_prec[0] - 1
             # Exponent grouping
             elif self.int_prec[1]:
-                exp = int(exp) / self.int_prec[1] * self.int_prec[1]
+                exp = int(exp) // self.int_prec[1] * self.int_prec[1]
             if not have_decimal or not isinstance(value, Decimal):
                 value = float(value)
             if exp < 0:

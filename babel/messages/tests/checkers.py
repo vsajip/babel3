@@ -16,7 +16,7 @@ import time
 import unittest
 
 from babel import __version__ as VERSION
-from babel.compat import StringIO
+from babel.compat import StringIO, BytesIO, u
 from babel.core import Locale, UnknownLocaleError
 from babel.dates import format_datetime
 from babel.messages import checkers
@@ -35,7 +35,7 @@ class CheckersTestCase(unittest.TestCase):
             except UnknownLocaleError:
                 # Just an alias? Not what we're testing here, let's continue
                 continue
-            po_file = (ur"""\
+            po_file = (u(r"""\
 # %(english_name)s translations for TestProject.
 # Copyright (C) 2007 FooBar, Inc.
 # This file is distributed under the same license as the TestProject
@@ -67,7 +67,7 @@ msgid "foobar"
 msgid_plural "foobars"
 msgstr[0] ""
 
-""" % dict(locale       = _locale,
+""") % dict(locale       = _locale,
            english_name = locale.english_name,
            version      = VERSION,
            year         = time.strftime('%Y'),
@@ -79,7 +79,7 @@ msgstr[0] ""
 
             # This test will fail for revisions <= 406 because so far
             # catalog.num_plurals was neglected
-            catalog = read_po(StringIO(po_file), _locale)
+            catalog = read_po(BytesIO(po_file), _locale)
             message = catalog['foobar']
             checkers.num_plurals(catalog, message)
 
@@ -102,7 +102,7 @@ msgstr[0] ""
             except UnknownLocaleError:
                 # Just an alias? Not what we're testing here, let's continue
                 continue
-            po_file = (ur"""\
+            po_file = (u(r"""\
 # %(english_name)s translations for TestProject.
 # Copyright (C) 2007 FooBar, Inc.
 # This file is distributed under the same license as the TestProject
@@ -136,7 +136,7 @@ msgstr[0] ""
 msgstr[1] ""
 msgstr[2] ""
 
-""" % dict(locale       = _locale,
+""") % dict(locale       = _locale,
            english_name = locale.english_name,
            version      = VERSION,
            year         = time.strftime('%Y'),
@@ -147,7 +147,7 @@ msgstr[2] ""
 
             # This test will fail for revisions <= 406 because so far
             # catalog.num_plurals was neglected
-            catalog = read_po(StringIO(po_file), _locale)
+            catalog = read_po(BytesIO(po_file), _locale)
             message = catalog['foobar']
             checkers.num_plurals(catalog, message)
 

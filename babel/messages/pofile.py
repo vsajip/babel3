@@ -32,7 +32,7 @@ __docformat__ = 'restructuredtext en'
 def unescape(string):
     r"""Reverse `escape` the given string.
 
-    >>> print unescape('"Say:\\n  \\"hello, world!\\"\\n"')
+    >>> print(unescape('"Say:\\n  \\"hello, world!\\"\\n"'))
     Say:
       "hello, world!"
     <BLANKLINE>
@@ -50,18 +50,18 @@ def unescape(string):
 def denormalize(string):
     r"""Reverse the normalization done by the `normalize` function.
 
-    >>> print denormalize(r'''""
+    >>> print(denormalize(r'''""
     ... "Say:\n"
-    ... "  \"hello, world!\"\n"''')
+    ... "  \"hello, world!\"\n"'''))
     Say:
       "hello, world!"
     <BLANKLINE>
 
-    >>> print denormalize(r'''""
+    >>> print(denormalize(r'''""
     ... "Say:\n"
     ... "  \"Lorem ipsum dolor sit "
     ... "amet, consectetur adipisicing"
-    ... " elit, \"\n"''')
+    ... " elit, \"\n"'''))
     Say:
       "Lorem ipsum dolor sit amet, consectetur adipisicing elit, "
     <BLANKLINE>
@@ -82,7 +82,7 @@ def read_po(fileobj, locale=None, domain=None, ignore_obsolete=False):
     """Read messages from a ``gettext`` PO (portable object) file from the given
     file-like object and return a `Catalog`.
 
-    >>> from StringIO import StringIO
+    >>> from babel.compat import StringIO
     >>> buf = StringIO('''
     ... #: main.py:1
     ... #, fuzzy, python-format
@@ -98,19 +98,29 @@ def read_po(fileobj, locale=None, domain=None, ignore_obsolete=False):
     ... msgstr[1] ""
     ... ''')
     >>> catalog = read_po(buf)
-    >>> catalog.revision_date = datetime(2007, 04, 01)
+    >>> catalog.revision_date = datetime(2007, 4, 1)
 
     >>> for message in catalog:
     ...     if message.id:
-    ...         print (message.id, message.string)
-    ...         print ' ', (message.locations, message.flags)
-    ...         print ' ', (message.user_comments, message.auto_comments)
-    (u'foo %(name)s', '')
-      ([(u'main.py', 1)], set([u'fuzzy', u'python-format']))
-      ([], [])
-    ((u'bar', u'baz'), ('', ''))
-      ([(u'main.py', 3)], set([]))
-      ([u'A user comment'], [u'An auto comment'])
+    ...         print('id(s): %s' % (isinstance(message.id, tuple) and u(',').join(message.id) or message.id))
+    ...         print('strings(s): %s' % (isinstance(message.string, tuple) and u(',').join(message.string) or message.string))
+    ...         for loc in message.locations:
+    ...             print('file: %s line: %d' % loc)
+    ...         print('flags: %s' % ' '.join(sorted(message.flags)))
+    ...         print('user comments: %s' % ','.join(message.user_comments))
+    ...         print('auto comments: %s' % ','.join(message.auto_comments))
+    id(s): foo %(name)s
+    strings(s): 
+    file: main.py line: 1
+    flags: fuzzy python-format
+    user comments: 
+    auto comments: 
+    id(s): bar,baz
+    strings(s): ,
+    file: main.py line: 3
+    flags: 
+    user comments: A user comment
+    auto comments: An auto comment
 
     :param fileobj: the file-like object to read the PO file from
     :param locale: the locale identifier or `Locale` object, or `None`
@@ -278,16 +288,16 @@ def escape(string):
 def normalize(string, prefix='', width=76):
     r"""Convert a string into a format that is appropriate for .po files.
 
-    >>> print normalize('''Say:
+    >>> print(normalize('''Say:
     ...   "hello, world!"
-    ... ''', width=None)
+    ... ''', width=None))
     ""
     "Say:\n"
     "  \"hello, world!\"\n"
 
-    >>> print normalize('''Say:
+    >>> print(normalize('''Say:
     ...   "Lorem ipsum dolor sit amet, consectetur adipisicing elit, "
-    ... ''', width=32)
+    ... ''', width=32))
     ""
     "Say:\n"
     "  \"Lorem ipsum dolor sit "
@@ -344,15 +354,15 @@ def write_po(fileobj, catalog, width=76, no_location=False, omit_header=False,
     message catalog to the provided file-like object.
 
     >>> catalog = Catalog()
-    >>> catalog.add(u'foo %(name)s', locations=[('main.py', 1)],
+    >>> catalog.add(u('foo %(name)s'), locations=[('main.py', 1)],
     ...             flags=('fuzzy',))
     <Message...>
-    >>> catalog.add((u'bar', u'baz'), locations=[('main.py', 3)])
+    >>> catalog.add((u('bar'), u('baz')), locations=[('main.py', 3)])
     <Message...>
-    >>> from StringIO import StringIO
-    >>> buf = StringIO()
+    >>> from babel.compat import BytesIO
+    >>> buf = BytesIO()
     >>> write_po(buf, catalog, omit_header=True)
-    >>> print buf.getvalue()
+    >>> print(buf.getvalue().decode('latin-1'))
     #: main.py:1
     #, fuzzy, python-format
     msgid "foo %(name)s"

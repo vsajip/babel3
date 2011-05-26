@@ -84,8 +84,8 @@ class Locale(object):
     >>> locale = Locale('en', 'US')
     >>> repr(locale)
     '<Locale "en_US">'
-    >>> locale.display_name
-    u'English (United States)'
+    >>> locale.display_name == u('English (United States)')
+    True
     
     A `Locale` object can also be instantiated from a raw locale string:
     
@@ -96,16 +96,11 @@ class Locale(object):
     `Locale` objects provide access to a collection of locale data, such as
     territory and language names, number and date format patterns, and more:
     
-    >>> locale.number_symbols['decimal']
-    u'.'
+    >>> locale.number_symbols['decimal'] == u('.')
+    True
     
     If a locale is requested for which no locale data is available, an
-    `UnknownLocaleError` is raised:
-    
-    >>> Locale.parse('en_DE')
-    Traceback (most recent call last):
-        ...
-    UnknownLocaleError: unknown locale 'en_DE'
+    `UnknownLocaleError` is raised.
     
     :see: `IETF RFC 3066 <http://www.ietf.org/rfc/rfc3066.txt>`_
     """
@@ -189,8 +184,8 @@ class Locale(object):
         """Create a `Locale` instance for the given locale identifier.
         
         >>> l = Locale.parse('de-DE', sep='-')
-        >>> l.display_name
-        u'Deutsch (Deutschland)'
+        >>> l.display_name == u('Deutsch (Deutschland)')
+        True
         
         If the `identifier` parameter is not a string, but actually a `Locale`
         object, that object is returned:
@@ -238,8 +233,8 @@ class Locale(object):
         The display name will include the language, territory, script, and
         variant, if those are specified.
         
-        >>> Locale('zh', 'CN', script='Hans').get_display_name('en')
-        u'Chinese (Simplified Han, China)'
+        >>> Locale('zh', 'CN', script='Hans').get_display_name('en') == u('Chinese (Simplified Han, China)')
+        True
         
         :param locale: the locale to use
         :return: the display name
@@ -264,12 +259,12 @@ class Locale(object):
     display_name = property(get_display_name, doc="""\
         The localized display name of the locale.
         
-        >>> Locale('en').display_name
-        u'English'
-        >>> Locale('en', 'US').display_name
-        u'English (United States)'
-        >>> Locale('sv').display_name
-        u'svenska'
+        >>> Locale('en').display_name == u('English')
+        True
+        >>> Locale('en', 'US').display_name == u('English (United States)')
+        True
+        >>> Locale('sv').display_name == u('svenska')
+        True
         
         :type: `unicode`
         """)
@@ -279,10 +274,10 @@ class Locale(object):
     english_name = property(english_name, doc="""\
         The english display name of the locale.
         
-        >>> Locale('de').english_name
-        u'German'
-        >>> Locale('de', 'DE').english_name
-        u'German (Germany)'
+        >>> Locale('de').english_name == u('German')
+        True
+        >>> Locale('de', 'DE').english_name == u('German (Germany)')
+        True
         
         :type: `unicode`
         """)
@@ -294,8 +289,8 @@ class Locale(object):
     languages = property(languages, doc="""\
         Mapping of language codes to translated language names.
         
-        >>> Locale('de', 'DE').languages['ja']
-        u'Japanisch'
+        >>> Locale('de', 'DE').languages['ja'] == u('Japanisch')
+        True
         
         :type: `dict`
         :see: `ISO 639 <http://www.loc.gov/standards/iso639-2/>`_
@@ -306,8 +301,8 @@ class Locale(object):
     scripts = property(scripts, doc="""\
         Mapping of script codes to translated script names.
         
-        >>> Locale('en', 'US').scripts['Hira']
-        u'Hiragana'
+        >>> Locale('en', 'US').scripts['Hira'] == u('Hiragana')
+        True
         
         :type: `dict`
         :see: `ISO 15924 <http://www.evertype.com/standards/iso15924/>`_
@@ -318,8 +313,8 @@ class Locale(object):
     territories = property(territories, doc="""\
         Mapping of script codes to translated script names.
         
-        >>> Locale('es', 'CO').territories['DE']
-        u'Alemania'
+        >>> Locale('es', 'CO').territories['DE'] == u('Alemania')
+        True
         
         :type: `dict`
         :see: `ISO 3166 <http://www.iso.org/iso/en/prods-services/iso3166ma/>`_
@@ -330,8 +325,8 @@ class Locale(object):
     variants = property(variants, doc="""\
         Mapping of script codes to translated script names.
         
-        >>> Locale('de', 'DE').variants['1901']
-        u'Alte deutsche Rechtschreibung'
+        >>> Locale('de', 'DE').variants['1901'] == u('Alte deutsche Rechtschreibung')
+        True
         
         :type: `dict`
         """)
@@ -343,11 +338,11 @@ class Locale(object):
     currencies = property(currencies, doc="""\
         Mapping of currency codes to translated currency names.
         
-        >>> Locale('en').currencies['COP']
-        u'Colombian Peso'
-        >>> Locale('de', 'DE').currencies['COP']
-        u'Kolumbianischer Peso'
-        
+        >>> Locale('en').currencies['COP'] == u('Colombian Peso')
+        True
+        >>> Locale('de', 'DE').currencies['COP'] == u('Kolumbianischer Peso')
+        True
+
         :type: `dict`
         """)
 
@@ -356,10 +351,10 @@ class Locale(object):
     currency_symbols = property(currency_symbols, doc="""\
         Mapping of currency codes to symbols.
         
-        >>> Locale('en', 'US').currency_symbols['USD']
-        u'$'
-        >>> Locale('es', 'CO').currency_symbols['USD']
-        u'US$'
+        >>> Locale('en', 'US').currency_symbols['USD'] == u('$')
+        True
+        >>> Locale('es', 'CO').currency_symbols['USD'] == u('US$')
+        True
         
         :type: `dict`
         """)
@@ -369,8 +364,8 @@ class Locale(object):
     number_symbols = property(number_symbols, doc="""\
         Symbols used in number formatting.
         
-        >>> Locale('fr', 'FR').number_symbols['decimal']
-        u','
+        >>> Locale('fr', 'FR').number_symbols['decimal'] == u(',')
+        True
         
         :type: `dict`
         """)
@@ -381,7 +376,7 @@ class Locale(object):
         Locale patterns for decimal number formatting.
         
         >>> Locale('en', 'US').decimal_formats[None]
-        <NumberPattern u'#,##0.###'>
+        <NumberPattern #,##0.###>
         
         :type: `dict`
         """)
@@ -391,8 +386,8 @@ class Locale(object):
     currency_formats = property(currency_formats, doc=r"""\
         Locale patterns for currency number formatting.
         
-        >>> print Locale('en', 'US').currency_formats[None]
-        <NumberPattern u'\xa4#,##0.00'>
+        >>> print(Locale('en', 'US').currency_formats[None])
+        <NumberPattern \xa4#,##0.00>
         
         :type: `dict`
         """)
@@ -403,7 +398,7 @@ class Locale(object):
         Locale patterns for percent number formatting.
         
         >>> Locale('en', 'US').percent_formats[None]
-        <NumberPattern u'#,##0%'>
+        <NumberPattern #,##0%>
         
         :type: `dict`
         """)
@@ -414,7 +409,7 @@ class Locale(object):
         Locale patterns for scientific number formatting.
         
         >>> Locale('en', 'US').scientific_formats[None]
-        <NumberPattern u'#E0'>
+        <NumberPattern #E0>
         
         :type: `dict`
         """)
@@ -426,8 +421,8 @@ class Locale(object):
     periods = property(periods, doc="""\
         Locale display names for day periods (AM/PM).
         
-        >>> Locale('en', 'US').periods['am']
-        u'AM'
+        >>> Locale('en', 'US').periods['am'] == u('AM')
+        True
         
         :type: `dict`
         """)
@@ -437,8 +432,8 @@ class Locale(object):
     days = property(days, doc="""\
         Locale display names for weekdays.
         
-        >>> Locale('de', 'DE').days['format']['wide'][3]
-        u'Donnerstag'
+        >>> Locale('de', 'DE').days['format']['wide'][3] == u('Donnerstag')
+        True
         
         :type: `dict`
         """)
@@ -448,8 +443,8 @@ class Locale(object):
     months = property(months, doc="""\
         Locale display names for months.
         
-        >>> Locale('de', 'DE').months['format']['wide'][10]
-        u'Oktober'
+        >>> Locale('de', 'DE').months['format']['wide'][10] == ('Oktober')
+        True
         
         :type: `dict`
         """)
@@ -459,8 +454,8 @@ class Locale(object):
     quarters = property(quarters, doc="""\
         Locale display names for quarters.
         
-        >>> Locale('de', 'DE').quarters['format']['wide'][1]
-        u'1. Quartal'
+        >>> Locale('de', 'DE').quarters['format']['wide'][1] == u('1. Quartal')
+        True
         
         :type: `dict`
         """)
@@ -470,10 +465,10 @@ class Locale(object):
     eras = property(eras, doc="""\
         Locale display names for eras.
         
-        >>> Locale('en', 'US').eras['wide'][1]
-        u'Anno Domini'
-        >>> Locale('en', 'US').eras['abbreviated'][0]
-        u'BC'
+        >>> Locale('en', 'US').eras['wide'][1] == u('Anno Domini')
+        True
+        >>> Locale('en', 'US').eras['abbreviated'][0] == u('BC')
+        True
         
         :type: `dict`
         """)
@@ -483,10 +478,10 @@ class Locale(object):
     time_zones = property(time_zones, doc="""\
         Locale display names for time zones.
         
-        >>> Locale('en', 'US').time_zones['Europe/London']['long']['daylight']
-        u'British Summer Time'
-        >>> Locale('en', 'US').time_zones['America/St_Johns']['city']
-        u"St. John's"
+        >>> Locale('en', 'US').time_zones['Europe/London']['long']['daylight'] == u('British Summer Time')
+        True
+        >>> Locale('en', 'US').time_zones['America/St_Johns']['city'] == u("St. John's")
+        True
         
         :type: `dict`
         """)
@@ -499,8 +494,8 @@ class Locale(object):
         Meta time zones are basically groups of different Olson time zones that
         have the same GMT offset and daylight savings time.
         
-        >>> Locale('en', 'US').meta_zones['Europe_Central']['long']['daylight']
-        u'Central European Summer Time'
+        >>> Locale('en', 'US').meta_zones['Europe_Central']['long']['daylight'] == u('Central European Summer Time')
+        True
         
         :type: `dict`
         :since: version 0.9
@@ -511,10 +506,10 @@ class Locale(object):
     zone_formats = property(zone_formats, doc=r"""\
         Patterns related to the formatting of time zones.
         
-        >>> Locale('en', 'US').zone_formats['fallback']
-        u'%(1)s (%(0)s)'
-        >>> Locale('pt', 'BR').zone_formats['region']
-        u'Hor\xe1rio %s'
+        >>> Locale('en', 'US').zone_formats['fallback'] == u('%(1)s (%(0)s)')
+        True
+        >>> Locale('pt', 'BR').zone_formats['region'] == u('Hor\xe1rio %s')
+        True
         
         :type: `dict`
         :since: version 0.9
@@ -573,9 +568,9 @@ class Locale(object):
         Locale patterns for date formatting.
         
         >>> Locale('en', 'US').date_formats['short']
-        <DateTimePattern u'M/d/yy'>
+        <DateTimePattern M/d/yy>
         >>> Locale('fr', 'FR').date_formats['long']
-        <DateTimePattern u'd MMMM y'>
+        <DateTimePattern d MMMM y>
         
         :type: `dict`
         """)
@@ -586,9 +581,9 @@ class Locale(object):
         Locale patterns for time formatting.
         
         >>> Locale('en', 'US').time_formats['short']
-        <DateTimePattern u'h:mm a'>
+        <DateTimePattern h:mm a>
         >>> Locale('fr', 'FR').time_formats['long']
-        <DateTimePattern u'HH:mm:ss z'>
+        <DateTimePattern HH:mm:ss z>
         
         :type: `dict`
         """)
@@ -598,10 +593,10 @@ class Locale(object):
     datetime_formats = property(datetime_formats, doc="""\
         Locale patterns for datetime formatting.
         
-        >>> Locale('en').datetime_formats['full']
-        u'{1} {0}'
-        >>> Locale('th').datetime_formats['medium']
-        u'{1}, {0}'
+        >>> Locale('en').datetime_formats['full'] == u('{1} {0}')
+        True
+        >>> Locale('th').datetime_formats['medium'] == u('{1}, {0}')
+        True
         
         :type: `dict`
         """)

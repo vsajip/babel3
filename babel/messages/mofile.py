@@ -21,7 +21,7 @@
 import array
 import struct
 
-from babel.compat import long_type, xrange
+from babel.compat import long_type, xrange, u, b, PY3
 from babel.messages.catalog import Catalog, Message
 
 __all__ = ['read_mo', 'write_mo']
@@ -85,21 +85,21 @@ def read_mo(fileobj):
                 item = item.strip()
                 if not item:
                     continue
-                if ':' in item:
-                    key, value = item.split(':', 1)
+                if b(':') in item:
+                    key, value = item.split(b(':'), 1)
                     lastkey = key = key.strip().lower()
                     headers[key] = value.strip()
                 elif lastkey:
                     headers[lastkey] += '\n' + item
 
-        if '\x04' in msg: # context
-            ctxt, msg = msg.split('\x04')
+        if b('\x04') in msg: # context
+            ctxt, msg = msg.split(b('\x04'))
         else:
             ctxt = None
 
-        if '\x00' in msg: # plural forms
-            msg = msg.split('\x00')
-            tmsg = tmsg.split('\x00')
+        if b('\x00') in msg: # plural forms
+            msg = msg.split(b('\x00'))
+            tmsg = tmsg.split(b('\x00'))
             if catalog.charset:
                 msg = [x.decode(catalog.charset) for x in msg]
                 tmsg = [x.decode(catalog.charset) for x in tmsg]
@@ -121,13 +121,12 @@ def write_mo(fileobj, catalog, use_fuzzy=False):
     format.
     
     >>> from babel.messages import Catalog
-    >>> from gettext import GNUTranslations
-    >>> from StringIO import StringIO
+    >>> from babel.compat import BytesIO, GNUTranslations
     
     >>> catalog = Catalog(locale='en_US')
     >>> catalog.add('foo', 'Voh')
     <Message ...>
-    >>> catalog.add((u'bar', u'baz'), (u'Bahr', u'Batz'))
+    >>> catalog.add((u('bar'), u('baz')), (u('Bahr'), u('Batz')))
     <Message ...>
     >>> catalog.add('fuz', 'Futz', flags=['fuzzy'])
     <Message ...>
@@ -135,25 +134,24 @@ def write_mo(fileobj, catalog, use_fuzzy=False):
     <Message ...>
     >>> catalog.add(('Fuzz', 'Fuzzes'), ('', ''))
     <Message ...>
-    >>> buf = StringIO()
-    
+    >>> buf = BytesIO()
     >>> write_mo(buf, catalog)
-    >>> buf.seek(0)
+    >>> _ = buf.seek(0)
     >>> translations = GNUTranslations(fp=buf)
-    >>> translations.ugettext('foo')
-    u'Voh'
-    >>> translations.ungettext('bar', 'baz', 1)
-    u'Bahr'
-    >>> translations.ungettext('bar', 'baz', 2)
-    u'Batz'
-    >>> translations.ugettext('fuz')
-    u'fuz'
-    >>> translations.ugettext('Fizz')
-    u'Fizz'
-    >>> translations.ugettext('Fuzz')
-    u'Fuzz'
-    >>> translations.ugettext('Fuzzes')
-    u'Fuzzes'
+    >>> translations.ugettext('foo') == u('Voh')
+    True
+    >>> translations.ungettext('bar', 'baz', 1) == u('Bahr')
+    True
+    >>> translations.ungettext('bar', 'baz', 2) == u('Batz')
+    True
+    >>> translations.ugettext('fuz') == u('fuz')
+    True
+    >>> translations.ugettext('Fizz') == u('Fizz')
+    True
+    >>> translations.ugettext('Fuzz') == u('Fuzz')
+    True
+    >>> translations.ugettext('Fuzzes') == u('Fuzzes')
+    True
     
     :param fileobj: the file-like object to write to
     :param catalog: the `Catalog` instance
@@ -165,14 +163,14 @@ def write_mo(fileobj, catalog, use_fuzzy=False):
         messages[1:] = [m for m in messages[1:] if not m.fuzzy]
     messages.sort()
 
-    ids = strs = ''
+    ids = strs = b('')
     offsets = []
 
     for message in messages:
         # For each string, we need size and file offset.  Each string is NUL
         # terminated; the NUL does not count into the size.
         if message.pluralizable:
-            msgid = '\x00'.join([
+            msgid = b('\x00').join([
                 msgid.encode(catalog.charset) for msgid in message.id
             ])
             msgstrs = []
@@ -181,7 +179,7 @@ def write_mo(fileobj, catalog, use_fuzzy=False):
                     msgstrs.append(message.id[min(int(idx), 1)])
                 else:
                     msgstrs.append(string)
-            msgstr = '\x00'.join([
+            msgstr = b('\x00').join([
                 msgstr.encode(catalog.charset) for msgstr in msgstrs
             ])
         else:
@@ -191,11 +189,11 @@ def write_mo(fileobj, catalog, use_fuzzy=False):
             else:
                 msgstr = message.string.encode(catalog.charset)
         if message.context:
-            msgid = '\x04'.join([message.context.encode(catalog.charset),
+            msgid = b('\x04').join([message.context.encode(catalog.charset),
                                  msgid])
         offsets.append((len(ids), len(msgid), len(strs), len(msgstr)))
-        ids += msgid + '\x00'
-        strs += msgstr + '\x00'
+        ids += msgid + b('\x00')
+        strs += msgstr + b('\x00')
 
     # The header is 7 32-bit unsigned integers.  We don't use hash tables, so
     # the keys start right after the index tables.
@@ -218,4 +216,9 @@ def write_mo(fileobj, catalog, use_fuzzy=False):
         7 * 4,                      # start of key index
         7 * 4 + len(messages) * 8,  # start of value index
         0, 0                        # size and offset of hash table
-    ) + array.array("i", offsets).tostring() + ids + strs)
+    ))
+    if PY3:
+        fileobj.write(array.array("i", offsets).tobytes())
+    else:
+        fileobj.write(array.array("i", offsets).tostring())
+    fileobj.write(ids + strs)

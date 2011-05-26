@@ -25,6 +25,7 @@ import os
 import sys
 from tokenize import generate_tokens, COMMENT, NAME, OP, STRING
 
+from babel.compat import PY3, binary_type
 from babel.util import parse_encoding, pathmatch, relpath
 from textwrap import dedent
 
@@ -216,10 +217,14 @@ def extract(method, fileobj, keywords=DEFAULT_KEYWORDS, comment_tags=(),
     ...    print _('Hello, world!')
     ... '''
 
-    >>> from StringIO import StringIO
+    >>> from babel.compat import StringIO
     >>> for message in extract('python', StringIO(source)):
-    ...     print message
-    (3, u'Hello, world!', [])
+    ...     print(message[0])
+    ...     print(message[1])
+    ...     print(message[2])
+    3
+    Hello, world!
+    []
 
     :param method: a string specifying the extraction method (.e.g. "python");
                    if this is a simple name, the extraction function will be
@@ -344,7 +349,16 @@ def extract_python(fileobj, keywords, comment_tags, options):
 
     encoding = parse_encoding(fileobj) or options.get('encoding', 'iso-8859-1')
 
-    tokens = generate_tokens(fileobj.readline)
+    def readline():
+        line = fileobj.readline()
+        if PY3 and isinstance(line, binary_type):
+            try:
+                line = line.decode(encoding)
+            except UnicodeDecodeError:
+                import pdb; pdb.set_trace()
+        return line
+
+    tokens = generate_tokens(readline)
     for tok, value, (lineno, _), _, _ in tokens:
         if call_stack == -1 and tok == NAME and value in ('def', 'class'):
             in_def = True
@@ -363,7 +377,9 @@ def extract_python(fileobj, keywords, comment_tags, options):
             continue
         elif call_stack == -1 and tok == COMMENT:
             # Strip the comment token from the line
-            value = value.decode(encoding)[1:].strip()
+            if not PY3:
+                value = value.decode(encoding)
+            value = value[1:].strip()
             if in_translator_comments and \
                     translator_comments[-1][0] == lineno - 1:
                 # We're already inside a translator comment, continue appending
@@ -409,7 +425,7 @@ def extract_python(fileobj, keywords, comment_tags, options):
                 # aid=617979&group_id=5470
                 value = eval('# coding=%s\n%s' % (encoding, value),
                              {'__builtins__':{}}, {})
-                if isinstance(value, str):
+                if isinstance(value, binary_type):
                     value = value.decode(encoding)
                 buf.append(value)
             elif tok == OP and value == ',':
@@ -456,7 +472,10 @@ def extract_javascript(fileobj, keywords, comment_tags, options):
     last_token = None
     call_stack = -1
 
-    for token in tokenize(fileobj.read().decode(encoding)):
+    data = fileobj.read()
+    if not PY3:
+        data = data.decode(encoding)
+    for token in tokenize(data):
         if token.type == 'operator' and token.value == '(':
             if funcname:
                 message_lineno = token.lineno

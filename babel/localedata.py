@@ -18,7 +18,7 @@
 """
 
 import os
-from babel.compat import pickle, DictMixin
+from babel.compat import pickle, DictMixin, PY3, u
 try:
     import threading
 except ImportError:
@@ -65,8 +65,8 @@ def load(name, merge_inherited=True):
     collection of pickle files inside the ``babel`` package.
     
     >>> d = load('en_US')
-    >>> d['languages']['sv']
-    u'Swedish'
+    >>> d['languages']['sv'] == u('Swedish')
+    True
     
     Note that the results are cached, and subsequent requests for the same
     locale return the same dictionary:
@@ -119,7 +119,7 @@ def merge(dict1, dict2):
     
     >>> d = {1: 'foo', 3: 'baz'}
     >>> merge(d, {1: 'Foo', 2: 'Bar'})
-    >>> items = d.items(); items.sort(); items
+    >>> items = sorted(d.items()); items
     [(1, 'Foo'), (2, 'Bar'), (3, 'baz')]
     
     :param dict1: the dictionary to merge into
@@ -186,6 +186,8 @@ class LocaleDataDict(DictMixin, dict):
 
     def __init__(self, data, base=None):
         dict.__init__(self, data)
+        if PY3:
+          DictMixin.__init__(self, data)
         if base is None:
             base = data
         self.base = base

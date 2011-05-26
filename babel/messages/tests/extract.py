@@ -16,7 +16,7 @@ import doctest
 import sys
 import unittest
 
-from babel.compat import StringIO, u
+from babel.compat import StringIO, BytesIO, u, b
 from babel.messages import extract
 
 
@@ -36,7 +36,7 @@ msg9 = dgettext('wiki', model.addPage())
 msg10 = dngettext(getDomain(), 'Page', 'Pages', 3)
 """)
         messages = list(extract.extract_python(buf,
-                                               list(extract.DEFAULT_KEYWORDS.keys()),
+                                               extract.DEFAULT_KEYWORDS.keys(),
                                                [], {}))
         self.assertEqual([
                 (1, '_', None, []),
@@ -336,19 +336,19 @@ msg = _('Bonjour à tous')
         self.assertEqual([u('NOTE: hello')], messages[0][3])
 
     def test_utf8_message_with_utf8_bom(self):
-        buf = StringIO(codecs.BOM_UTF8 + """
+        buf = BytesIO(codecs.BOM_UTF8 + u("""
 # NOTE: hello
-msg = _('Bonjour à tous')
-""")
+msg = _('Bonjour \xe0 tous')
+""").encode('utf-8'))
         messages = list(extract.extract_python(buf, ('_',), ['NOTE:'], {}))
         self.assertEqual(u('Bonjour \xe0 tous'), messages[0][2])
         self.assertEqual([u('NOTE: hello')], messages[0][3])
 
     def test_utf8_raw_strings_match_unicode_strings(self):
-        buf = StringIO(codecs.BOM_UTF8 + """
-msg = _('Bonjour à tous')
-msgu = _(u'Bonjour à tous')
-""")
+        buf = BytesIO(codecs.BOM_UTF8 + u("""
+msg = _('Bonjour \xe0 tous')
+msgu = _(u'Bonjour \xe0 tous')
+""").encode('utf-8'))
         messages = list(extract.extract_python(buf, ('_',), ['NOTE:'], {}))
         self.assertEqual(u('Bonjour \xe0 tous'), messages[0][2])
         self.assertEqual(messages[0][2], messages[1][2])

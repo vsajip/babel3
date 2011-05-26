@@ -17,10 +17,11 @@ import codecs
 from datetime import timedelta, tzinfo
 import os
 import re
+import sys
 import textwrap
 import time
 
-from babel.compat import PY3
+from babel.compat import PY3, binary_type, text_type, b
 
 missing = object()
 
@@ -35,9 +36,9 @@ def distinct(iterable):
     Unlike when using sets for a similar effect, the original ordering of the
     items in the collection is preserved by this function.
 
-    >>> print list(distinct([1, 2, 1, 3, 4, 4]))
+    >>> print(list(distinct([1, 2, 1, 3, 4, 4])))
     [1, 2, 3, 4]
-    >>> print list(distinct('foobar'))
+    >>> print(list(distinct('foobar')))
     ['f', 'o', 'b', 'a', 'r']
 
     :param iterable: the iterable collection providing the data
@@ -52,7 +53,7 @@ def distinct(iterable):
 
 # Regexp to match python magic encoding line
 PYTHON_MAGIC_COMMENT_re = re.compile(
-    r'[ \t\f]* \# .* coding[=:][ \t]*([-\w.]+)', re.VERBOSE)
+    b(r'[ \t\f]* \# .* coding[=:][ \t]*([-\w.]+)'), re.VERBOSE)
 def parse_encoding(fp):
     """Deduce the encoding of a source file from magic comment.
 
@@ -68,6 +69,8 @@ def parse_encoding(fp):
     fp.seek(0)
     try:
         line1 = fp.readline()
+        if isinstance(line1, text_type):
+            line1 = line1.encode()
         has_bom = line1.startswith(codecs.BOM_UTF8)
         if has_bom:
             line1 = line1[len(codecs.BOM_UTF8):]
@@ -76,7 +79,7 @@ def parse_encoding(fp):
         if not m:
             try:
                 import parser
-                parser.suite(line1)
+                parser.suite(line1.decode())
             except (ImportError, SyntaxError):
                 # Either it's a real syntax error, in which case the source is
                 # not valid python source, or line2 is a continuation of line1,
@@ -85,6 +88,8 @@ def parse_encoding(fp):
                 pass
             else:
                 line2 = fp.readline()
+                if isinstance(line2, text_type):
+                    line2 = line2.encode()
                 m = PYTHON_MAGIC_COMMENT_re.match(line2)
 
         if has_bom:
@@ -173,87 +178,99 @@ def wraptext(text, width=70, initial_indent='', subsequent_indent=''):
                           break_long_words=False)
     return wrapper.wrap(text)
 
+if sys.version_info >= (3, 1):
+    import collections
 
-class odict(dict):
-    """Ordered dict implementation.
+    class odict(collections.OrderedDict):
+        """
+        Ordered dict implementation.
+        As per PEP 372, an ordered dict was added to Python 3.1 and above
+        Use that here, as the odict below did not work for py3.2
+        """
+        def __init__(self, data=None):
+            collections.OrderedDict.__init__(self, data or {})
     
-    :see: http://aspn.activestate.com/ASPN/Cookbook/Python/Recipe/107747
-    """
-    def __init__(self, data=None):
-        dict.__init__(self, data or {})
-        self._keys = dict.keys(self)
+else:
+    class odict(dict):
+        """Ordered dict implementation.
+        
+        :see: http://aspn.activestate.com/ASPN/Cookbook/Python/Recipe/107747
+        """
+        def __init__(self, data=None):
+            dict.__init__(self, data or {})
+            self._keys = dict.keys(self)
 
-    def __delitem__(self, key):
-        dict.__delitem__(self, key)
-        self._keys.remove(key)
+        def __delitem__(self, key):
+            dict.__delitem__(self, key)
+            self._keys.remove(key)
 
-    def __setitem__(self, key, item):
-        dict.__setitem__(self, key, item)
-        if key not in self._keys:
-            self._keys.append(key)
+        def __setitem__(self, key, item):
+            dict.__setitem__(self, key, item)
+            if key not in self._keys:
+                self._keys.append(key)
 
-    def __iter__(self):
-        return iter(self._keys)
-    iterkeys = __iter__
+        def __iter__(self):
+            return iter(self._keys)
+        iterkeys = __iter__
 
-    def clear(self):
-        dict.clear(self)
-        self._keys = []
+        def clear(self):
+            dict.clear(self)
+            self._keys = []
 
-    def copy(self):
-        d = odict()
-        d.update(self)
-        return d
+        def copy(self):
+            d = odict()
+            d.update(self)
+            return d
 
-    def items(self):
-        if PY3:
-            return list(zip(self._keys, list(self.values())))
-        else:
-            return zip(self._keys, self.values())
+        def items(self):
+            if PY3:
+                return list(zip(self._keys, list(self.values())))
+            else:
+                return zip(self._keys, self.values())
 
-    def iteritems(self):
-        if PY3:
-            return zip(self._keys, iter(self.values()))
-        else:
-            from itertools import izip
-            return izip(self._keys, self.itervalues())
+        def iteritems(self):
+            if PY3:
+                return zip(self._keys, iter(self.values()))
+            else:
+                from itertools import izip
+                return izip(self._keys, self.itervalues())
 
-    def keys(self):
-        return self._keys[:]
+        def keys(self):
+            return self._keys[:]
 
-    def pop(self, key, default=missing):
-        if default is missing:
-            return dict.pop(self, key)
-        elif key not in self:
-            return default
-        self._keys.remove(key)
-        return dict.pop(self, key, default)
+        def pop(self, key, default=missing):
+            if default is missing:
+                return dict.pop(self, key)
+            elif key not in self:
+                return default
+            self._keys.remove(key)
+            return dict.pop(self, key, default)
 
-    def popitem(self, key):
-        self._keys.remove(key)
-        return dict.popitem(key)
+        def popitem(self, key):
+            self._keys.remove(key)
+            return dict.popitem(key)
 
-    def setdefault(self, key, failobj = None):
-        dict.setdefault(self, key, failobj)
-        if key not in self._keys:
-            self._keys.append(key)
+        def setdefault(self, key, failobj = None):
+            dict.setdefault(self, key, failobj)
+            if key not in self._keys:
+                self._keys.append(key)
 
-    def update(self, dict):
-        for (key, val) in dict.items():
-            self[key] = val
+        def update(self, dict):
+            for (key, val) in dict.items():
+                self[key] = val
 
-    def values(self):
-        if PY3:
-            return list(map(self.get, self._keys))
-        else:
-            return map(self.get, self._keys)
+        def values(self):
+            if PY3:
+                return list(map(self.get, self._keys))
+            else:
+                return map(self.get, self._keys)
 
-    def itervalues(self):
-        if PY3:
-            return map(self.get, self._keys)
-        else:
-            from itertools import imap
-            return imap(self.get, self._keys)
+        def itervalues(self):
+            if PY3:
+                return map(self.get, self._keys)
+            else:
+                from itertools import imap
+                return imap(self.get, self._keys)
 
 
 try:

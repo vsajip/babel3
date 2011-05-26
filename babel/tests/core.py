@@ -16,7 +16,7 @@ import os
 import unittest
 
 from babel import core
-from babel.core import default_locale
+from babel.core import default_locale, Locale, UnknownLocaleError
 
 class DefaultLocaleTest(unittest.TestCase):
     
@@ -42,6 +42,10 @@ class DefaultLocaleTest(unittest.TestCase):
         os.environ['LC_CTYPE'] = 'UTF-8'
         # must not throw an exception
         default_locale('LC_CTYPE')
+
+    def test_unknown(self):
+        self.assertRaises(UnknownLocaleError, Locale.parse, 'en_DE')
+
 
 def suite():
     suite = unittest.TestSuite()

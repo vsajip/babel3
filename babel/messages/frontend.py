@@ -283,7 +283,7 @@ class extract_messages(Command):
 
     def run(self):
         mappings = self._get_mappings()
-        outfile = open(self.output_file, 'w')
+        outfile = open(self.output_file, 'wb')
         try:
             catalog = Catalog(project=self.distribution.get_name(),
                               version=self.distribution.get_version(),
@@ -446,7 +446,7 @@ class init_catalog(Command):
         catalog.locale = self._locale
         catalog.fuzzy = False
 
-        outfile = open(self.output_file, 'w')
+        outfile = open(self.output_file, 'wb')
         try:
             write_po(outfile, catalog)
         finally:
@@ -625,9 +625,8 @@ class CommandLineInterface(object):
 
         self._configure_logging(options.loglevel)
         if options.list_locales:
-            identifiers = localedata.locale_identifiers()
+            identifiers = sorted(localedata.locale_identifiers())
             longest = max([len(identifier) for identifier in identifiers])
-            identifiers.sort()
             format = u('%%-%ds %%s') % (longest + 1)
             for identifier in identifiers:
                 locale = Locale.parse(identifier)
@@ -667,8 +666,7 @@ class CommandLineInterface(object):
         print("commands:")
         longest = max([len(command) for command in self.commands])
         format = "  %%-%ds %%s" % max(8, longest + 1)
-        commands = self.commands.items()
-        commands.sort()
+        commands = sorted(self.commands.items())
         for name, description in commands:
             print(format % (name, description))
 
@@ -847,7 +845,7 @@ class CommandLineInterface(object):
             parser.error('incorrect number of arguments')
 
         if options.output not in (None, '-'):
-            outfile = open(options.output, 'w')
+            outfile = open(options.output, 'wb')
         else:
             outfile = sys.stdout
 
@@ -980,7 +978,7 @@ class CommandLineInterface(object):
         self.log.info('creating catalog %r based on %r', options.output_file,
                       options.input_file)
 
-        outfile = open(options.output_file, 'w')
+        outfile = open(options.output_file, 'wb')
         try:
             write_po(outfile, catalog)
         finally:
@@ -1180,10 +1178,9 @@ def parse_mapping(fileobj, filename=None):
 def parse_keywords(strings=[]):
     """Parse keywords specifications from the given list of strings.
 
-    >>> kw = parse_keywords(['_', 'dgettext:2', 'dngettext:2,3']).items()
-    >>> kw.sort()
-    >>> for keyword, indices in kw:
-    ...     print (keyword, indices)
+    >>> kw = sorted(parse_keywords(['_', 'dgettext:2', 'dngettext:2,3']).items())
+    >>> for keyword, indices in sorted(kw):
+    ...     print((keyword, indices))
     ('_', None)
     ('dgettext', (2,))
     ('dngettext', (2, 3))

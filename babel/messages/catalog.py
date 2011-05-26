@@ -23,7 +23,7 @@ import sys
 import time
 
 from babel import __version__ as VERSION
-from babel.compat import u, string_types
+from babel.compat import u, string_types, PY3
 from babel.core import Locale
 from babel.dates import format_datetime
 from babel.messages.plurals import get_plural
@@ -86,11 +86,15 @@ class Message(object):
         self.context = context
 
     def __repr__(self):
-        return '<%s %r (flags: %r)>' % (type(self).__name__, self.id,
+        return '<%s %s (flags: %r)>' % (type(self).__name__, self.id,
                                         list(self.flags))
 
     def __cmp__(self, obj):
         """Compare Messages, taking into account plural ids"""
+        
+        def cmp(a, b):
+            return ((a > b) - (a < b))
+
         if isinstance(obj, Message):
             plural = self.pluralizable
             obj_plural = obj.pluralizable
@@ -102,11 +106,29 @@ class Message(object):
                 return cmp(self.id, obj.id[0])
         return cmp(self.id, obj.id)
 
+    def __gt__(self, other):
+        return self.__cmp__(other) > 0
+
+    def __lt__(self, other):
+        return self.__cmp__(other) < 0
+
+    def __ge__(self, other):
+        return self.__cmp__(other) >= 0
+
+    def __le__(self, other):
+        return self.__cmp__(other) <= 0
+
+    def __eq__(self, other):
+        return self.__cmp__(other) == 0
+
+    def __ne__(self, other):
+        return self.__cmp__(other) != 0
+
     def clone(self):
-        return Message(*tuple(map(copy, (self.id, self.string, self.locations,
+        return Message(*map(copy, (self.id, self.string, self.locations,
                                    self.flags, self.auto_comments,
                                    self.user_comments, self.previous_id,
-                                   self.lineno, self.context))))
+                                   self.lineno, self.context)))
 
     def check(self, catalog=None):
         """Run various validation checks on the message.  Some validations
@@ -138,7 +160,7 @@ class Message(object):
         >>> msg.fuzzy
         True
         >>> msg
-        <Message 'foo' (flags: ['fuzzy'])>
+        <Message foo (flags: ['fuzzy'])>
 
         :type:  `bool`
         """)
@@ -268,7 +290,7 @@ class Catalog(object):
 
     >>> catalog = Catalog(project='Foobar', version='1.0',
     ...                   copyright_holder='Foo Company')
-    >>> print catalog.header_comment #doctest: +ELLIPSIS
+    >>> print(catalog.header_comment) #doctest: +ELLIPSIS
     # Translations template for Foobar.
     # Copyright (C) ... Foo Company
     # This file is distributed under the same license as the Foobar project.
@@ -286,7 +308,7 @@ class Catalog(object):
     ... # This file is distributed under the same license as the PROJECT
     ... # project.
     ... #'''
-    >>> print catalog.header_comment
+    >>> print(catalog.header_comment)
     # The POT for my really cool Foobar project.
     # Copyright (C) 1990-2003 Foo Company
     # This file is distributed under the same license as the Foobar
@@ -417,7 +439,7 @@ class Catalog(object):
     >>> catalog = Catalog(project='Foobar', version='1.0',
     ...                   creation_date=created)
     >>> for name, value in catalog.mime_headers:
-    ...     print '%s: %s' % (name, value)
+    ...     print('%s: %s' % (name, value))
     Project-Id-Version: Foobar 1.0
     Report-Msgid-Bugs-To: EMAIL@ADDRESS
     POT-Creation-Date: 1990-04-01 15:30+0000
@@ -437,7 +459,7 @@ class Catalog(object):
     ...                   last_translator='John Doe <jd@example.com>',
     ...                   language_team='de_DE <de@example.com>')
     >>> for name, value in catalog.mime_headers:
-    ...     print '%s: %s' % (name, value)
+    ...     print('%s: %s' % (name, value))
     Project-Id-Version: Foobar 1.0
     Report-Msgid-Bugs-To: EMAIL@ADDRESS
     POT-Creation-Date: 1990-04-01 15:30+0000
@@ -553,19 +575,19 @@ class Catalog(object):
         """Add or update the message with the specified ID.
 
         >>> catalog = Catalog()
-        >>> catalog[u'foo'] = Message(u'foo')
-        >>> catalog[u'foo']
-        <Message u'foo' (flags: [])>
+        >>> catalog[u('foo')] = Message(u('foo'))
+        >>> catalog[u('foo')]
+        <Message foo (flags: [])>
 
         If a message with that ID is already in the catalog, it is updated
         to include the locations and flags of the new message.
 
         >>> catalog = Catalog()
-        >>> catalog[u'foo'] = Message(u'foo', locations=[('main.py', 1)])
-        >>> catalog[u'foo'].locations
+        >>> catalog[u('foo')] = Message(u('foo'), locations=[('main.py', 1)])
+        >>> catalog[u('foo')].locations
         [('main.py', 1)]
-        >>> catalog[u'foo'] = Message(u'foo', locations=[('utils.py', 5)])
-        >>> catalog[u'foo'].locations
+        >>> catalog[u('foo')] = Message(u('foo'), locations=[('utils.py', 5)])
+        >>> catalog[u('foo')].locations
         [('main.py', 1), ('utils.py', 5)]
 
         :param id: the message ID
@@ -591,11 +613,13 @@ class Catalog(object):
             # special treatment for the header message
             def _parse_header(header_string):
                 # message_from_string only works for str, not for unicode
-                headers = message_from_string(header_string.encode('utf8'))
+                if not PY3:
+                    header_string = header_string.encode('utf8')
+                headers = message_from_string(header_string)
                 decoded_headers = {}
                 for name, value in headers.items():
-                    name = name.decode('utf8')
-                    value = value.decode('utf8')
+                    if not PY3:
+                        name, value = name.decode('utf8'), value.decode('utf8')
                     decoded_headers[name] = value
                 return decoded_headers
             self.mime_headers = list(_parse_header(message.string).items())
@@ -613,10 +637,10 @@ class Catalog(object):
         """Add or update the message with the specified ID.
 
         >>> catalog = Catalog()
-        >>> catalog.add(u'foo')
+        >>> catalog.add(u('foo'))
         <Message ...>
-        >>> catalog[u'foo']
-        <Message u'foo' (flags: [])>
+        >>> catalog[u('foo')]
+        <Message foo (flags: [])>
 
         This method simply constructs a `Message` object with the given
         arguments and invokes `__setitem__` with that object.
@@ -690,11 +714,11 @@ class Catalog(object):
         >>> template.add(('salad', 'salads'), locations=[('util.py', 42)])
         <Message ...>
         >>> catalog = Catalog(locale='de_DE')
-        >>> catalog.add('blue', u'blau', locations=[('main.py', 98)])
+        >>> catalog.add('blue', u('blau'), locations=[('main.py', 98)])
         <Message ...>
-        >>> catalog.add('head', u'Kopf', locations=[('util.py', 33)])
+        >>> catalog.add('head', u('Kopf'), locations=[('util.py', 33)])
         <Message ...>
-        >>> catalog.add(('salad', 'salads'), (u'Salat', u'Salate'),
+        >>> catalog.add(('salad', 'salads'), (u('Salat'), u('Salate')),
         ...             locations=[('util.py', 38)])
         <Message ...>
 
@@ -708,14 +732,16 @@ class Catalog(object):
         [('main.py', 99)]
 
         >>> msg2 = catalog['blue']
-        >>> msg2.string
-        u'blau'
+        >>> print(msg2.string)
+        blau
         >>> msg2.locations
         [('main.py', 100)]
 
         >>> msg3 = catalog['salad']
-        >>> msg3.string
-        (u'Salat', u'Salate')
+        >>> print(msg3.string[0])
+        Salat
+        >>> print(msg3.string[1])
+        Salate
         >>> msg3.locations
         [('util.py', 42)]
 
@@ -725,8 +751,9 @@ class Catalog(object):
 
         >>> 'head' in catalog
         False
-        >>> catalog.obsolete.values()
-        [<Message 'head' (flags: [])>]
+        >>> for v in catalog.obsolete.values():
+        ...     print(v)
+        <Message head (flags: [])>
 
         :param template: the reference catalog, usually read from a POT file
         :param no_fuzzy_matching: whether to use fuzzy matching of message IDs
@@ -788,7 +815,7 @@ class Catalog(object):
                         else:
                             matchkey = key
                         matches = get_close_matches(matchkey.lower().strip(),
-                                                    list(fuzzy_candidates.keys()), 1)
+                                                    fuzzy_candidates.keys(), 1)
                         if matches:
                             newkey = matches[0]
                             newctxt = fuzzy_candidates[newkey]
