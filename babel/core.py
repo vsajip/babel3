@@ -30,10 +30,10 @@ def get_global(key):
     The global data is stored in the ``babel/global.dat`` file and contains
     information independent of individual locales.
     
-    >>> get_global('zone_aliases')['UTC']
-    'Etc/GMT'
-    >>> get_global('zone_territories')['Europe/Berlin']
-    'DE'
+    >>> get_global('zone_aliases')['UTC'] == 'Etc/GMT'
+    True
+    >>> get_global('zone_territories')['Europe/Berlin'] == 'DE'
+    True
     
     :param key: the data key
     :return: the dictionary found in the global data under the given key
@@ -606,14 +606,14 @@ class Locale(object):
     plural_form = property(plural_form, doc="""\
         Plural rules for the locale.
         
-        >>> Locale('en').plural_form(1)
-        'one'
-        >>> Locale('en').plural_form(0)
-        'other'
-        >>> Locale('fr').plural_form(0)
-        'one'
-        >>> Locale('ru').plural_form(100)
-        'many'
+        >>> Locale('en').plural_form(1) == 'one'
+        True
+        >>> Locale('en').plural_form(0) == 'other'
+        True
+        >>> Locale('fr').plural_form(0) == 'one'
+        True
+        >>> Locale('ru').plural_form(100) == 'many'
+        True
         
         :type: `PluralRule`
         """)
