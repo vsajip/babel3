@@ -184,18 +184,22 @@ class LazyProxy(object):
     Hello, universe!
     Hello, world!
     """
-    __slots__ = ['_func', '_args', '_kwargs', '_value']
+    __slots__ = ['_func', '_args', '_kwargs', '_value', '_is_cache_enabled']
 
     def __init__(self, func, *args, **kwargs):
+        is_cache_enabled = kwargs.pop('enable_cache', True)
         # Avoid triggering our own __setattr__ implementation
         object.__setattr__(self, '_func', func)
         object.__setattr__(self, '_args', args)
         object.__setattr__(self, '_kwargs', kwargs)
+        object.__setattr__(self, '_is_cache_enabled', is_cache_enabled)
         object.__setattr__(self, '_value', None)
 
     def value(self):
         if self._value is None:
             value = self._func(*self._args, **self._kwargs)
+            if not self._is_cache_enabled:
+                return value
             object.__setattr__(self, '_value', value)
         return self._value
     value = property(value)
@@ -385,11 +389,13 @@ class Translations(gettext.GNUTranslations, object):
         """ 
         return self._domains.get(domain, self).lgettext(message)
     
-    def dugettext(self, domain, message):
+    def udgettext(self, domain, message):
         """Like ``ugettext()``, but look the message up in the specified
         domain.
         """
         return self._domains.get(domain, self).ugettext(message)
+    # backward compatibility with 0.9
+    dugettext = udgettext
     
     def dngettext(self, domain, singular, plural, num):
         """Like ``ngettext()``, but look the message up in the specified
@@ -403,11 +409,13 @@ class Translations(gettext.GNUTranslations, object):
         """
         return self._domains.get(domain, self).lngettext(singular, plural, num)
     
-    def dungettext(self, domain, singular, plural, num):
+    def udngettext(self, domain, singular, plural, num):
         """Like ``ungettext()`` but look the message up in the specified
         domain.
         """
         return self._domains.get(domain, self).ungettext(singular, plural, num)
+    # backward compatibility with 0.9
+    dungettext  = udngettext
 
     # Most of the downwards code, until it get's included in stdlib, from:
     #    http://bugs.python.org/file10036/gettext-pgettext.patch
@@ -545,11 +553,13 @@ class Translations(gettext.GNUTranslations, object):
         """
         return self._domains.get(domain, self).pgettext(context, message)
     
-    def dupgettext(self, domain, context, message):
+    def udpgettext(self, domain, context, message):
         """Like `upgettext()`, but look the message up in the specified
         `domain`.
         """
         return self._domains.get(domain, self).upgettext(context, message)
+    # backward compatibility with 0.9
+    dupgettext = udpgettext
 
     def ldpgettext(self, domain, context, message):
         """Equivalent to ``dpgettext()``, but the translation is returned in the
@@ -565,12 +575,14 @@ class Translations(gettext.GNUTranslations, object):
         return self._domains.get(domain, self).npgettext(context, singular,
                                                          plural, num)
         
-    def dunpgettext(self, domain, context, singular, plural, num):
+    def udnpgettext(self, domain, context, singular, plural, num):
         """Like ``unpgettext``, but look the message up in the specified
         `domain`.
         """
         return self._domains.get(domain, self).unpgettext(context, singular,
                                                           plural, num)
+    # backward compatibility with 0.9
+    dunpgettext = udnpgettext
 
     def ldnpgettext(self, domain, context, singular, plural, num):
         """Equivalent to ``dnpgettext()``, but the translation is returned in

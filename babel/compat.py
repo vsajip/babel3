@@ -78,3 +78,19 @@ else:
 
 long_type = integer_types[-1]
 
+try:
+    from xml.etree import ElementTree
+except ImportError:
+    from elementtree import ElementTree
+
+try:
+    any = any
+except NameError:
+    def any(iterable):
+        return filter(None, list(iterable))
+
+try:
+    import threading
+except ImportError:
+    import dummy_threading as threading
+

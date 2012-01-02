@@ -308,10 +308,10 @@ class extract_messages(Command):
                                              callback=callback,
                                              strip_comment_tags=
                                                 self.strip_comments)
-                for filename, lineno, message, comments in extracted:
+                for filename, lineno, message, comments, context in extracted:
                     filepath = os.path.normpath(os.path.join(dirname, filename))
                     catalog.add(message, None, [(filepath, lineno)],
-                                auto_comments=comments)
+                                auto_comments=comments, context=context)
 
             log.info('writing PO template file to %s' % self.output_file)
             write_po(outfile, catalog, width=self.width,
@@ -438,7 +438,7 @@ class init_catalog(Command):
         infile = open(self.input_file, 'r')
         try:
             # Although reading from the catalog template, read_po must be fed
-            # the locale in order to correcly calculate plurals
+            # the locale in order to correctly calculate plurals
             catalog = read_po(infile, locale=self.locale)
         finally:
             infile.close()
@@ -904,10 +904,10 @@ class CommandLineInterface(object):
                                              callback=callback,
                                              strip_comment_tags=
                                                 options.strip_comment_tags)
-                for filename, lineno, message, comments in extracted:
+                for filename, lineno, message, comments, context in extracted:
                     filepath = os.path.normpath(os.path.join(dirname, filename))
                     catalog.add(message, None, [(filepath, lineno)],
-                                auto_comments=comments)
+                                auto_comments=comments, context=context)
 
             if options.output not in (None, '-'):
                 self.log.info('writing PO template file to %s' % options.output)
@@ -967,7 +967,7 @@ class CommandLineInterface(object):
         infile = open(options.input_file, 'r')
         try:
             # Although reading from the catalog template, read_po must be fed
-            # the locale in order to correcly calculate plurals
+            # the locale in order to correctly calculate plurals
             catalog = read_po(infile, locale=options.locale)
         finally:
             infile.close()
@@ -1178,12 +1178,13 @@ def parse_mapping(fileobj, filename=None):
 def parse_keywords(strings=[]):
     """Parse keywords specifications from the given list of strings.
 
-    >>> kw = sorted(parse_keywords(['_', 'dgettext:2', 'dngettext:2,3']).items())
+    >>> kw = sorted(parse_keywords(['_', 'dgettext:2', 'dngettext:2,3', 'pgettext:1c,2']).items())
     >>> for keyword, indices in sorted(kw):
     ...     print((keyword, indices))
     ('_', None)
     ('dgettext', (2,))
     ('dngettext', (2, 3))
+    ('pgettext', ((1, 'c'), 2))
     """
     keywords = {}
     for string in strings:
@@ -1193,7 +1194,13 @@ def parse_keywords(strings=[]):
             funcname, indices = string, None
         if funcname not in keywords:
             if indices:
-                indices = tuple([(int(x)) for x in indices.split(',')])
+                inds = []
+                for x in indices.split(','):
+                    if x[-1] == 'c':
+                        inds.append((int(x[:-1]), 'c'))
+                    else:
+                        inds.append(int(x))
+                indices = tuple(inds)
             keywords[funcname] = indices
     return keywords
 

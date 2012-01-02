@@ -95,16 +95,19 @@ class Message(object):
         def cmp(a, b):
             return ((a > b) - (a < b))
 
-        if isinstance(obj, Message):
-            plural = self.pluralizable
-            obj_plural = obj.pluralizable
-            if plural and obj_plural:
-                return cmp(self.id[0], obj.id[0])
-            elif plural:
-                return cmp(self.id[0], obj.id)
-            elif obj_plural:
-                return cmp(self.id, obj.id[0])
-        return cmp(self.id, obj.id)
+        def values_to_compare():
+            if isinstance(obj, Message):
+                plural = self.pluralizable
+                obj_plural = obj.pluralizable
+                if plural and obj_plural:
+                    return self.id[0], obj.id[0]
+                elif plural:
+                    return self.id[0], obj.id
+                elif obj_plural:
+                    return self.id, obj.id[0]
+            return self.id, obj.id
+        this, other = values_to_compare()
+        return cmp(this, other)
 
     def __gt__(self, other):
         return self.__cmp__(other) > 0

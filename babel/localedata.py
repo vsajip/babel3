@@ -18,11 +18,7 @@
 """
 
 import os
-from babel.compat import pickle, DictMixin, PY3, u
-try:
-    import threading
-except ImportError:
-    import dummy_threading as threading
+from babel.compat import pickle, DictMixin, PY3, u, threading
 
 __all__ = ['exists', 'locale_identifiers', 'load']
 __docformat__ = 'restructuredtext en'

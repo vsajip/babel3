@@ -23,15 +23,11 @@ following environment variables, in that order:
 # TODO:
 #  Padding and rounding increments in pattern:
 #  - http://www.unicode.org/reports/tr35/ (Appendix G.6)
+from decimal import Decimal
 import math
 import re
-try:
-    from decimal import Decimal
-    have_decimal = True
-except ImportError:
-    have_decimal = False
 
-from babel.compat import u, b, long_type, PY3
+from babel.compat import u, b, long_type, PY3, xrange
 from babel.core import default_locale, Locale
 
 __all__ = ['format_number', 'format_decimal', 'format_currency',
@@ -316,7 +312,7 @@ number_re = re.compile(r"%s%s%s" % (PREFIX_PATTERN, NUMBER_PATTERN,
 
 def split_number(value):
     """Convert a number into a (intasstring, fractionasstring) tuple"""
-    if have_decimal and isinstance(value, Decimal):
+    if isinstance(value, Decimal):
         text = str(value)
     else:
         text = ('%.9f' % value).rstrip('0')
@@ -355,8 +351,15 @@ def bankersround(value, ndigits=0):
         add = 1
     elif digits[i] == '5' and digits[i-1] in '13579':
         add = 1
+    elif digits[i] == '5':     # previous digit is even
+        # We round up unless all following digits are zero.
+        for j in xrange(i + 1, len(digits)):
+            if digits[j] != '0':
+                add = 1
+                break
+
     scale = 10**ndigits
-    if have_decimal and isinstance(value, Decimal):
+    if isinstance(value, Decimal):
         return Decimal(int(value * scale + add)) / scale * sign
     else:
         return float(int(value * scale + add)) / scale * sign
@@ -388,7 +391,6 @@ def parse_pattern(pattern):
     else:
         integer = number
         fraction = ''
-    min_frac = max_frac = 0
 
     def parse_precision(p):
         """Calculate the min and max allowed digits"""
@@ -481,7 +483,7 @@ class NumberPattern(object):
             # Exponent grouping
             elif self.int_prec[1]:
                 exp = int(exp) // self.int_prec[1] * self.int_prec[1]
-            if not have_decimal or not isinstance(value, Decimal):
+            if not isinstance(value, Decimal):
                 value = float(value)
             if exp < 0:
                 value = value * 10**(-exp)
