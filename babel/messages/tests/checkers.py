@@ -11,12 +11,14 @@
 # individuals. For the exact contribution history, see the revision
 # history and logs, available at http://babel.edgewall.org/log/.
 
+from __future__ import unicode_literals
+
 from datetime import datetime
 import time
 import unittest
 
 from babel import __version__ as VERSION
-from babel.compat import StringIO, BytesIO, u
+from babel.compat import StringIO, BytesIO
 from babel.core import Locale, UnknownLocaleError
 from babel.dates import format_datetime
 from babel.messages import checkers
@@ -35,7 +37,7 @@ class CheckersTestCase(unittest.TestCase):
             except UnknownLocaleError:
                 # Just an alias? Not what we're testing here, let's continue
                 continue
-            po_file = (u(r"""\
+            po_file = (r"""\
 # %(english_name)s translations for TestProject.
 # Copyright (C) 2007 FooBar, Inc.
 # This file is distributed under the same license as the TestProject
@@ -67,7 +69,7 @@ msgid "foobar"
 msgid_plural "foobars"
 msgstr[0] ""
 
-""") % dict(locale       = _locale,
+""" % dict(locale       = _locale,
            english_name = locale.english_name,
            version      = VERSION,
            year         = time.strftime('%Y'),
@@ -102,7 +104,7 @@ msgstr[0] ""
             except UnknownLocaleError:
                 # Just an alias? Not what we're testing here, let's continue
                 continue
-            po_file = (u(r"""\
+            po_file = (r"""\
 # %(english_name)s translations for TestProject.
 # Copyright (C) 2007 FooBar, Inc.
 # This file is distributed under the same license as the TestProject
@@ -136,7 +138,7 @@ msgstr[0] ""
 msgstr[1] ""
 msgstr[2] ""
 
-""") % dict(locale       = _locale,
+""" % dict(locale       = _locale,
            english_name = locale.english_name,
            version      = VERSION,
            year         = time.strftime('%Y'),

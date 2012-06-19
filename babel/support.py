@@ -11,6 +11,8 @@
 # individuals. For the exact contribution history, see the revision
 # history and logs, available at http://babel.edgewall.org/log/.
 
+from __future__ import unicode_literals
+
 """Several classes and functions that help with integrating and using Babel
 in applications.
 
@@ -21,7 +23,7 @@ from datetime import date, datetime, timedelta
 import gettext
 import locale
 
-from babel.compat import text_type, u
+from babel.compat import text_type
 from babel.core import Locale
 from babel.dates import format_date, format_datetime, format_time, \
                         format_timedelta
@@ -38,9 +40,9 @@ class Format(object):
     bound to a specific locale and time-zone.
     
     >>> fmt = Format('en_US', UTC)
-    >>> fmt.date(date(2007, 4, 1)) == u('Apr 1, 2007')
+    >>> fmt.date(date(2007, 4, 1)) == 'Apr 1, 2007'
     True
-    >>> fmt.decimal(1.2345) == u('1.234')
+    >>> fmt.decimal(1.2345) == '1.234'
     True
     """
 
@@ -57,7 +59,7 @@ class Format(object):
         """Return a date formatted according to the given pattern.
         
         >>> fmt = Format('en_US')
-        >>> fmt.date(date(2007, 4, 1)) == u('Apr 1, 2007')
+        >>> fmt.date(date(2007, 4, 1)) == 'Apr 1, 2007'
         True
         
         :see: `babel.dates.format_date`
@@ -69,7 +71,7 @@ class Format(object):
         
         >>> from pytz import timezone
         >>> fmt = Format('en_US', tzinfo=timezone('US/Eastern'))
-        >>> fmt.datetime(datetime(2007, 4, 1, 15, 30)) == u('Apr 1, 2007 11:30:00 AM')
+        >>> fmt.datetime(datetime(2007, 4, 1, 15, 30)) == 'Apr 1, 2007 11:30:00 AM'
         True
         
         :see: `babel.dates.format_datetime`
@@ -82,7 +84,7 @@ class Format(object):
         
         >>> from pytz import timezone
         >>> fmt = Format('en_US', tzinfo=timezone('US/Eastern'))
-        >>> fmt.time(datetime(2007, 4, 1, 15, 30)) == u('11:30:00 AM')
+        >>> fmt.time(datetime(2007, 4, 1, 15, 30)) == '11:30:00 AM'
         True
         
         :see: `babel.dates.format_time`
@@ -93,7 +95,7 @@ class Format(object):
         """Return a time delta according to the rules of the given locale.
         
         >>> fmt = Format('en_US')
-        >>> fmt.timedelta(timedelta(weeks=11)) == u('3 mths')
+        >>> fmt.timedelta(timedelta(weeks=11)) == '3 mths'
         True
         
         :see: `babel.dates.format_timedelta`
@@ -105,7 +107,7 @@ class Format(object):
         """Return an integer number formatted for the locale.
         
         >>> fmt = Format('en_US')
-        >>> fmt.number(1099) == u('1,099')
+        >>> fmt.number(1099) == '1,099'
         True
         
         :see: `babel.numbers.format_number`
@@ -116,7 +118,7 @@ class Format(object):
         """Return a decimal number formatted for the locale.
         
         >>> fmt = Format('en_US')
-        >>> fmt.decimal(1.2345) == u('1.234')
+        >>> fmt.decimal(1.2345) == '1.234'
         True
         
         :see: `babel.numbers.format_decimal`
@@ -134,7 +136,7 @@ class Format(object):
         """Return a number formatted as percentage for the locale.
         
         >>> fmt = Format('en_US')
-        >>> fmt.percent(0.34) == u('34%')
+        >>> fmt.percent(0.34) == '34%'
         True
         
         :see: `babel.numbers.format_percent`
@@ -158,9 +160,9 @@ class LazyProxy(object):
     >>> lazy_greeting = LazyProxy(greeting, name='Joe')
     >>> print(lazy_greeting)
     Hello, Joe!
-    >>> u('  ') + lazy_greeting == u('  Hello, Joe!')
+    >>> '  ' + lazy_greeting == '  Hello, Joe!'
     True
-    >>> u('(%s)') % lazy_greeting == u('(Hello, Joe!)')
+    >>> '(%s)' % lazy_greeting == '(Hello, Joe!)'
     True
     
     This can be used, for example, to implement lazy translation functions that

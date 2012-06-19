@@ -11,6 +11,8 @@
 # individuals. For the exact contribution history, see the revision
 # history and logs, available at http://babel.edgewall.org/log/.
 
+from __future__ import unicode_literals
+
 """Data structures for message catalogs."""
 
 from cgi import parse_header
@@ -23,7 +25,7 @@ import sys
 import time
 
 from babel import __version__ as VERSION
-from babel.compat import u, string_types, PY3
+from babel.compat import string_types, PY3
 from babel.core import Locale
 from babel.dates import format_datetime
 from babel.messages.plurals import get_plural
@@ -48,7 +50,7 @@ PYTHON_FORMAT = re.compile(r'''(?x)
 class Message(object):
     """Representation of a single message in a catalog."""
 
-    def __init__(self, id, string=u(''), locations=(), flags=(), auto_comments=(),
+    def __init__(self, id, string='', locations=(), flags=(), auto_comments=(),
                  user_comments=(), previous_id=(), lineno=None, context=None):
         """Create the message object.
 
@@ -68,7 +70,7 @@ class Message(object):
         """
         self.id = id #: The message ID
         if not string and self.pluralizable:
-            string = (u(''), u(''))
+            string = ('', '')
         self.string = string #: The message translation
         self.locations = list(distinct(locations))
         self.flags = set(flags)
@@ -87,7 +89,7 @@ class Message(object):
 
     def __repr__(self):
         return '<%s %s (flags: %r)>' % (type(self).__name__, self.id,
-                                        list(self.flags))
+                                        [str(f) for f in self.flags])
 
     def __cmp__(self, obj):
         """Compare Messages, taking into account plural ids"""
@@ -203,12 +205,12 @@ class TranslationError(Exception):
     translations are encountered."""
 
 
-DEFAULT_HEADER = u("""\
+DEFAULT_HEADER = """\
 # Translations template for PROJECT.
 # Copyright (C) YEAR ORGANIZATION
 # This file is distributed under the same license as the PROJECT project.
 # FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
-#""")
+#"""
 
 
 class Catalog(object):
@@ -354,7 +356,7 @@ class Catalog(object):
             name = name.lower()
             if name == 'project-id-version':
                 parts = value.split(' ')
-                self.project = u(' ').join(parts[:-1])
+                self.project = ' '.join(parts[:-1])
                 self.version = parts[-1]
             elif name == 'report-msgid-bugs-to':
                 self.msgid_bugs_address = value
@@ -519,10 +521,10 @@ class Catalog(object):
     plural_forms = property(plural_forms, doc="""\
     Return the plural forms declaration for the locale.
 
-    >>> Catalog(locale='en').plural_forms
-    'nplurals=2; plural=(n != 1)'
-    >>> Catalog(locale='pt_BR').plural_forms
-    'nplurals=2; plural=(n > 1)'
+    >>> Catalog(locale='en').plural_forms == 'nplurals=2; plural=(n != 1)'
+    True
+    >>> Catalog(locale='pt_BR').plural_forms == 'nplurals=2; plural=(n > 1)'
+    True
 
     :type: `str`
     """)
@@ -550,7 +552,7 @@ class Catalog(object):
         flags = set()
         if self.fuzzy:
             flags |= set(['fuzzy'])
-        yield Message(u(''), '\n'.join(buf), flags=flags)
+        yield Message('', '\n'.join(buf), flags=flags)
         for key in self._messages:
             yield self._messages[key]
 
@@ -578,20 +580,20 @@ class Catalog(object):
         """Add or update the message with the specified ID.
 
         >>> catalog = Catalog()
-        >>> catalog[u('foo')] = Message(u('foo'))
-        >>> catalog[u('foo')]
+        >>> catalog['foo'] = Message('foo')
+        >>> catalog['foo']
         <Message foo (flags: [])>
 
         If a message with that ID is already in the catalog, it is updated
         to include the locations and flags of the new message.
 
         >>> catalog = Catalog()
-        >>> catalog[u('foo')] = Message(u('foo'), locations=[('main.py', 1)])
-        >>> catalog[u('foo')].locations
-        [('main.py', 1)]
-        >>> catalog[u('foo')] = Message(u('foo'), locations=[('utils.py', 5)])
-        >>> catalog[u('foo')].locations
-        [('main.py', 1), ('utils.py', 5)]
+        >>> catalog['foo'] = Message('foo', locations=[('main.py', 1)])
+        >>> catalog['foo'].locations == [('main.py', 1)]
+        True
+        >>> catalog['foo'] = Message('foo', locations=[('utils.py', 5)])
+        >>> catalog['foo'].locations == [('main.py', 1), ('utils.py', 5)]
+        True
 
         :param id: the message ID
         :param message: the `Message` object
@@ -640,9 +642,9 @@ class Catalog(object):
         """Add or update the message with the specified ID.
 
         >>> catalog = Catalog()
-        >>> catalog.add(u('foo'))
+        >>> catalog.add('foo')
         <Message ...>
-        >>> catalog[u('foo')]
+        >>> catalog['foo']
         <Message foo (flags: [])>
 
         This method simply constructs a `Message` object with the given
@@ -717,11 +719,11 @@ class Catalog(object):
         >>> template.add(('salad', 'salads'), locations=[('util.py', 42)])
         <Message ...>
         >>> catalog = Catalog(locale='de_DE')
-        >>> catalog.add('blue', u('blau'), locations=[('main.py', 98)])
+        >>> catalog.add('blue', 'blau', locations=[('main.py', 98)])
         <Message ...>
-        >>> catalog.add('head', u('Kopf'), locations=[('util.py', 33)])
+        >>> catalog.add('head', 'Kopf', locations=[('util.py', 33)])
         <Message ...>
-        >>> catalog.add(('salad', 'salads'), (u('Salat'), u('Salate')),
+        >>> catalog.add(('salad', 'salads'), ('Salat', 'Salate'),
         ...             locations=[('util.py', 38)])
         <Message ...>
 
@@ -731,22 +733,22 @@ class Catalog(object):
 
         >>> msg1 = catalog['green']
         >>> msg1.string
-        >>> msg1.locations
-        [('main.py', 99)]
+        >>> msg1.locations == [('main.py', 99)]
+        True
 
         >>> msg2 = catalog['blue']
         >>> print(msg2.string)
         blau
-        >>> msg2.locations
-        [('main.py', 100)]
+        >>> msg2.locations == [('main.py', 100)]
+        True
 
         >>> msg3 = catalog['salad']
         >>> print(msg3.string[0])
         Salat
         >>> print(msg3.string[1])
         Salate
-        >>> msg3.locations
-        [('util.py', 42)]
+        >>> msg3.locations == [('util.py', 42)]
+        True
 
         Messages that are in the catalog but not in the template are removed
         from the main collection, but can still be accessed via the `obsolete`
@@ -792,7 +794,7 @@ class Catalog(object):
                 if not isinstance(message.string, (list, tuple)):
                     fuzzy = True
                     message.string = tuple(
-                        [message.string] + ([u('')] * (len(message.id) - 1))
+                        [message.string] + ([''] * (len(message.id) - 1))
                     )
                 elif len(message.string) != self.num_plurals:
                     fuzzy = True
@@ -802,7 +804,7 @@ class Catalog(object):
                 message.string = message.string[0]
             message.flags |= oldmsg.flags
             if fuzzy:
-                message.flags |= set([u('fuzzy')])
+                message.flags |= set(['fuzzy'])
             self[message.id] = message
 
         for message in template:

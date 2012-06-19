@@ -20,12 +20,13 @@ is builtin, extractors for other sources can be added using very simple plugins.
 The main entry points into the extraction functionality are the functions
 `extract_from_dir` and `extract_from_file`.
 """
+from __future__ import unicode_literals
 
 import os
 import sys
 from tokenize import generate_tokens, COMMENT, NAME, OP, STRING
 
-from babel.compat import PY3, binary_type
+from babel.compat import PY3
 from babel.util import parse_encoding, pathmatch, relpath
 from textwrap import dedent
 
@@ -364,7 +365,7 @@ def extract_python(fileobj, keywords, comment_tags, options):
 
     def readline():
         line = fileobj.readline()
-        if PY3 and isinstance(line, binary_type):
+        if PY3 and isinstance(line, bytes):
             try:
                 line = line.decode(encoding)
             except UnicodeDecodeError:
@@ -436,9 +437,16 @@ def extract_python(fileobj, keywords, comment_tags, options):
                 # encoding
                 # https://sourceforge.net/tracker/?func=detail&atid=355470&
                 # aid=617979&group_id=5470
-                value = eval('# coding=%s\n%s' % (encoding, value),
-                             {'__builtins__':{}}, {})
-                if isinstance(value, binary_type):
+                if PY3:
+                    s = '# coding=%s\n%s' % (encoding, value)
+                else:
+                    s = ('# coding=%s\n' % encoding).encode(encoding)
+                    if isinstance(value, bytes):
+                        s += value
+                    else:
+                        s += value.encode(encoding)
+                value = eval(s, {'__builtins__':{}}, {})
+                if isinstance(value, bytes):
                     value = value.decode(encoding)
                 buf.append(value)
             elif tok == OP and value == ',':
@@ -486,7 +494,7 @@ def extract_javascript(fileobj, keywords, comment_tags, options):
     call_stack = -1
 
     data = fileobj.read()
-    if not PY3:
+    if isinstance(data, bytes):
         data = data.decode(encoding)
     for token in tokenize(data):
         if token.type == 'operator' and token.value == '(':

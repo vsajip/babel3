@@ -11,6 +11,8 @@
 # individuals. For the exact contribution history, see the revision
 # history and logs, available at http://babel.edgewall.org/log/.
 
+from __future__ import unicode_literals
+
 """Low-level locale data access.
 
 :note: The `Locale` class, which uses this module under the hood, provides a
@@ -18,7 +20,7 @@
 """
 
 import os
-from babel.compat import pickle, DictMixin, PY3, u, threading
+from babel.compat import pickle, DictMixin, PY3, threading
 
 __all__ = ['exists', 'locale_identifiers', 'load']
 __docformat__ = 'restructuredtext en'
@@ -61,7 +63,7 @@ def load(name, merge_inherited=True):
     collection of pickle files inside the ``babel`` package.
     
     >>> d = load('en_US')
-    >>> d['languages']['sv'] == u('Swedish')
+    >>> d['languages']['sv'] == 'Swedish'
     True
     
     Note that the results are cached, and subsequent requests for the same
@@ -115,8 +117,8 @@ def merge(dict1, dict2):
     
     >>> d = {1: 'foo', 3: 'baz'}
     >>> merge(d, {1: 'Foo', 2: 'Bar'})
-    >>> items = sorted(d.items()); items
-    [(1, 'Foo'), (2, 'Bar'), (3, 'baz')]
+    >>> items = sorted(d.items()); items == [(1, 'Foo'), (2, 'Bar'), (3, 'baz')]
+    True
     
     :param dict1: the dictionary to merge into
     :param dict2: the dictionary containing the data that should be merged

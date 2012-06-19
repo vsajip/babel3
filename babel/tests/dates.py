@@ -11,6 +11,8 @@
 # individuals. For the exact contribution history, see the revision
 # history and logs, available at http://babel.edgewall.org/log/.
 
+from __future__ import unicode_literals
+
 from datetime import date, datetime, time, timedelta
 import doctest
 import unittest
@@ -18,7 +20,6 @@ import unittest
 from pytz import timezone
 
 from babel import dates
-from babel.compat import u
 from babel.util import FixedOffsetTimezone
 
 
@@ -43,7 +44,7 @@ class DateTimeFormatTestCase(unittest.TestCase):
     def test_abbreviated_month_alias(self):
         d = date(2006, 3, 8)
         fmt = dates.DateTimeFormat(d, locale='de_DE')
-        self.assertEqual(u('M\xe4r'), fmt['LLL'])
+        self.assertEqual('M\xe4r', fmt['LLL'])
 
     def test_week_of_year_first(self):
         d = date(2006, 1, 8)
@@ -203,7 +204,7 @@ class DateTimeFormatTestCase(unittest.TestCase):
         tz = timezone('Europe/Paris')
         t = time(15, 30, tzinfo=tz)
         fmt = dates.DateTimeFormat(t, locale='fr_FR')
-        self.assertEqual(u('Heure de l\u2019Europe centrale'), fmt['vvvv'])
+        self.assertEqual('Heure de l\u2019Europe centrale', fmt['vvvv'])
 
     def test_hour_formatting(self):
         l = 'en_US'

@@ -11,12 +11,14 @@
 # individuals. For the exact contribution history, see the revision
 # history and logs, available at http://babel.edgewall.org/log/.
 
+from __future__ import unicode_literals
+
 import doctest
 import gettext
 import os
 import unittest
 
-from babel.compat import BytesIO, u, text_type
+from babel.compat import BytesIO, text_type
 from babel.messages import mofile, Catalog
 
 
@@ -47,26 +49,26 @@ class WriteMoTestCase(unittest.TestCase):
         # can be applied to all subsequent messages by GNUTranslations
         # (ensuring all messages are safely converted to unicode)
         catalog = Catalog(locale='en_US')
-        catalog.add(u(''), '''\
+        catalog.add('', '''\
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n''')
-        catalog.add(u('foo'), 'Voh')
-        catalog.add((u('There is'), u('There are')), (u('Es gibt'), u('Es gibt')))
-        catalog.add(u('Fizz'), '')
+        catalog.add('foo', 'Voh')
+        catalog.add(('There is', 'There are'), ('Es gibt', 'Es gibt'))
+        catalog.add('Fizz', '')
         catalog.add(('Fuzz', 'Fuzzes'), ('', ''))
         buf = BytesIO()
         mofile.write_mo(buf, catalog)
         buf.seek(0)
         translations = gettext.GNUTranslations(fp=buf)
-        self.assertEqual(u('Voh'), translations.ugettext('foo'))
+        self.assertEqual('Voh', translations.ugettext('foo'))
         assert isinstance(translations.ugettext('foo'), text_type)
-        self.assertEqual(u('Es gibt'), translations.ungettext('There is', 'There are', 1))
+        self.assertEqual('Es gibt', translations.ungettext('There is', 'There are', 1))
         assert isinstance(translations.ungettext('There is', 'There are', 1), text_type)
-        self.assertEqual(u('Fizz'), translations.ugettext('Fizz'))
+        self.assertEqual('Fizz', translations.ugettext('Fizz'))
         assert isinstance(translations.ugettext('Fizz'), text_type)
-        self.assertEqual(u('Fuzz'), translations.ugettext('Fuzz'))
+        self.assertEqual('Fuzz', translations.ugettext('Fuzz'))
         assert isinstance(translations.ugettext('Fuzz'), text_type)
-        self.assertEqual(u('Fuzzes'), translations.ugettext('Fuzzes'))
+        self.assertEqual('Fuzzes', translations.ugettext('Fuzzes'))
         assert isinstance(translations.ugettext('Fuzzes'), text_type)
 
     def test_more_plural_forms(self):

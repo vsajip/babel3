@@ -11,12 +11,14 @@
 # individuals. For the exact contribution history, see the revision
 # history and logs, available at http://babel.edgewall.org/log/.
 
+from __future__ import unicode_literals
+
 import doctest
 import os
 import unittest
 
 from babel import support
-from babel.compat import BytesIO, u, b
+from babel.compat import BytesIO
 from babel.messages import Catalog
 from babel.messages.mofile import write_mo
 
@@ -59,108 +61,108 @@ class TranslationsTestCase(unittest.TestCase):
             "match: %r!=%r" % (type(expected), type(result))
 
     def test_pgettext(self):
-        self.assertEqualTypeToo('Voh', self.translations.gettext('foo'))
-        self.assertEqualTypeToo(b('VohCTX'), self.translations.pgettext('foo',
+        self.assertEqualTypeToo(str('Voh'), self.translations.gettext('foo'))
+        self.assertEqualTypeToo(b'VohCTX', self.translations.pgettext('foo',
                                                                      'foo'))
 
     def test_upgettext(self):
-        self.assertEqualTypeToo(u('Voh'), self.translations.ugettext('foo'))
-        self.assertEqualTypeToo(u('VohCTX'), self.translations.upgettext('foo',
-                                                                       'foo'))
+        self.assertEqualTypeToo('Voh', self.translations.ugettext('foo'))
+        self.assertEqualTypeToo('VohCTX', self.translations.upgettext('foo',
+                                                                      'foo'))
 
     def test_lpgettext(self):
-        self.assertEqualTypeToo(b('Voh'), self.translations.lgettext('foo'))
-        self.assertEqualTypeToo(b('VohCTX'), self.translations.lpgettext('foo',
+        self.assertEqualTypeToo(b'Voh', self.translations.lgettext('foo'))
+        self.assertEqualTypeToo(b'VohCTX', self.translations.lpgettext('foo',
                                                                       'foo'))
 
     def test_npgettext(self):
-        self.assertEqualTypeToo('Voh1',
+        self.assertEqualTypeToo(str('Voh1'),
                                 self.translations.ngettext('foo1', 'foos1', 1))
-        self.assertEqualTypeToo('Vohs1',
+        self.assertEqualTypeToo(str('Vohs1'),
                                 self.translations.ngettext('foo1', 'foos1', 2))
-        self.assertEqualTypeToo(b('VohCTX1'),
+        self.assertEqualTypeToo(b'VohCTX1',
                                 self.translations.npgettext('foo', 'foo1',
                                                             'foos1', 1))
-        self.assertEqualTypeToo(b('VohsCTX1'),
+        self.assertEqualTypeToo(b'VohsCTX1',
                                 self.translations.npgettext('foo', 'foo1',
                                                             'foos1', 2))
 
     def test_unpgettext(self):
-        self.assertEqualTypeToo(u('Voh1'),
+        self.assertEqualTypeToo('Voh1',
                                 self.translations.ungettext('foo1', 'foos1', 1))
-        self.assertEqualTypeToo(u('Vohs1'),
+        self.assertEqualTypeToo('Vohs1',
                                 self.translations.ungettext('foo1', 'foos1', 2))
-        self.assertEqualTypeToo(u('VohCTX1'),
+        self.assertEqualTypeToo('VohCTX1',
                                 self.translations.unpgettext('foo', 'foo1',
                                                              'foos1', 1))
-        self.assertEqualTypeToo(u('VohsCTX1'),
+        self.assertEqualTypeToo('VohsCTX1',
                                 self.translations.unpgettext('foo', 'foo1',
                                                              'foos1', 2))
 
     def test_lnpgettext(self):
-        self.assertEqualTypeToo(b('Voh1'),
+        self.assertEqualTypeToo(b'Voh1',
                                 self.translations.lngettext('foo1', 'foos1', 1))
-        self.assertEqualTypeToo(b('Vohs1'),
+        self.assertEqualTypeToo(b'Vohs1',
                                 self.translations.lngettext('foo1', 'foos1', 2))
-        self.assertEqualTypeToo(b('VohCTX1'),
+        self.assertEqualTypeToo(b'VohCTX1',
                                 self.translations.lnpgettext('foo', 'foo1',
                                                              'foos1', 1))
-        self.assertEqualTypeToo(b('VohsCTX1'),
+        self.assertEqualTypeToo(b'VohsCTX1',
                                 self.translations.lnpgettext('foo', 'foo1',
                                                              'foos1', 2))
 
     def test_dpgettext(self):
         self.assertEqualTypeToo(
-            'VohD', self.translations.dgettext('messages1', 'foo'))
+            str('VohD'), self.translations.dgettext('messages1', 'foo'))
         self.assertEqualTypeToo(
-            b('VohCTXD'), self.translations.dpgettext('messages1', 'foo', 'foo'))
+            b'VohCTXD', self.translations.dpgettext('messages1', 'foo', 'foo'))
 
     def test_dupgettext(self):
         self.assertEqualTypeToo(
-            u('VohD'), self.translations.dugettext('messages1', 'foo'))
+            'VohD', self.translations.dugettext('messages1', 'foo'))
         self.assertEqualTypeToo(
-            u('VohCTXD'), self.translations.dupgettext('messages1', 'foo', 'foo'))
+            'VohCTXD', self.translations.dupgettext('messages1', 'foo', 'foo'))
 
     def test_ldpgettext(self):
         self.assertEqualTypeToo(
-            b('VohD'), self.translations.ldgettext('messages1', 'foo'))
+            b'VohD', self.translations.ldgettext('messages1', 'foo'))
         self.assertEqualTypeToo(
-            b('VohCTXD'), self.translations.ldpgettext('messages1', 'foo', 'foo'))
+            b'VohCTXD', self.translations.ldpgettext('messages1', 'foo', 'foo'))
 
     def test_dnpgettext(self):
         self.assertEqualTypeToo(
-            'VohD1', self.translations.dngettext('messages1', 'foo1', 'foos1', 1))
+            str('VohD1'), self.translations.dngettext('messages1', 'foo1', 'foos1', 1))
         self.assertEqualTypeToo(
-            'VohsD1', self.translations.dngettext('messages1', 'foo1', 'foos1', 2))
+            str('VohsD1'), self.translations.dngettext('messages1', 'foo1', 'foos1', 2))
         self.assertEqualTypeToo(
-            b('VohCTXD1'), self.translations.dnpgettext('messages1', 'foo', 'foo1',
+            b'VohCTXD1', self.translations.dnpgettext('messages1', 'foo', 'foo1',
                                                      'foos1', 1))
         self.assertEqualTypeToo(
-            b('VohsCTXD1'), self.translations.dnpgettext('messages1', 'foo', 'foo1',
+            b'VohsCTXD1', self.translations.dnpgettext('messages1', 'foo', 'foo1',
                                                       'foos1', 2))
 
     def test_dunpgettext(self):
         self.assertEqualTypeToo(
-            u('VohD1'), self.translations.dungettext('messages1', 'foo1', 'foos1', 1))
+            'VohD1', self.translations.dungettext('messages1', 'foo1', 'foos1', 1))
         self.assertEqualTypeToo(
-            u('VohsD1'), self.translations.dungettext('messages1', 'foo1', 'foos1', 2))
+            'VohsD1', self.translations.dungettext('messages1', 'foo1', 'foos1', 2))
         self.assertEqualTypeToo(
-            u('VohCTXD1'), self.translations.dunpgettext('messages1', 'foo', 'foo1',
+            'VohCTXD1', self.translations.dunpgettext('messages1', 'foo', 'foo1',
                                                        'foos1', 1))
         self.assertEqualTypeToo(
-            u('VohsCTXD1'), self.translations.dunpgettext('messages1', 'foo', 'foo1',
+            'VohsCTXD1', self.translations.dunpgettext('messages1', 'foo', 'foo1',
                                                         'foos1', 2))
 
     def test_ldnpgettext(self):
         self.assertEqualTypeToo(
-            b('VohD1'), self.translations.ldngettext('messages1', 'foo1', 'foos1', 1))
+            b'VohD1', self.translations.ldngettext('messages1', 'foo1', 'foos1', 1))
         self.assertEqualTypeToo(
-            b('VohsD1'), self.translations.ldngettext('messages1', 'foo1', 'foos1', 2))
+            b'VohsD1', self.translations.ldngettext('messages1', 'foo1', 'foos1', 2))
         self.assertEqualTypeToo(
-            b('VohCTXD1'), self.translations.ldnpgettext('messages1', 'foo', 'foo1',
+            b'VohCTXD1', self.translations.ldnpgettext('messages1', 'foo', 'foo1',
                                                       'foos1', 1))
         self.assertEqualTypeToo(
-            b('VohsCTXD1'), self.translations.ldnpgettext('messages1', 'foo', 'foo1',
+            b'VohsCTXD1', self.translations.ldnpgettext('messages1', 'foo', 'foo1',
                                                        'foos1', 2))
 
 

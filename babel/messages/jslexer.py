@@ -14,11 +14,12 @@
 """A simple JavaScript 1.5 lexer which is used for the JavaScript
 extractor.
 """
+from __future__ import unicode_literals
 
 from operator import itemgetter
 import re
 
-from babel.compat import unichr, u
+from babel.compat import unichr
 
 operators = [
     '+', '-', '*', '%', '!=', '==', '<', '>', '<=', '>=', '=',
@@ -132,7 +133,7 @@ def unquote_string(string):
     if pos < len(string):
         add(string[pos:])
 
-    return u('').join(result)
+    return ''.join(result)
 
 
 def tokenize(source):

@@ -12,6 +12,8 @@
 # individuals. For the exact contribution history, see the revision
 # history and logs, available at http://babel.edgewall.org/log/.
 
+from __future__ import unicode_literals
+
 """Frontends for the message extraction functionality."""
 
 from datetime import datetime
@@ -28,7 +30,7 @@ import tempfile
 
 from babel import __version__ as VERSION
 from babel import Locale, localedata
-from babel.compat import RawConfigParser, StringIO, string_types, u
+from babel.compat import RawConfigParser, StringIO, string_types
 from babel.core import UnknownLocaleError
 from babel.messages.catalog import Catalog
 from babel.messages.extract import extract_from_dir, DEFAULT_KEYWORDS, \
@@ -133,7 +135,8 @@ class compile_catalog(Command):
             raise DistutilsOptionError('no message catalogs found')
 
         for idx, (locale, po_file) in enumerate(po_files):
-            mo_file = mo_files[idx]
+            po_file = str(po_file)
+            mo_file = str(mo_files[idx])
             infile = open(po_file, 'r')
             try:
                 catalog = read_po(infile, locale)
@@ -627,7 +630,7 @@ class CommandLineInterface(object):
         if options.list_locales:
             identifiers = sorted(localedata.locale_identifiers())
             longest = max([len(identifier) for identifier in identifiers])
-            format = u('%%-%ds %%s') % (longest + 1)
+            format = '%%-%ds %%s' % (longest + 1)
             for identifier in identifiers:
                 locale = Locale.parse(identifier)
                 output = format % (identifier, locale.english_name)
@@ -741,7 +744,8 @@ class CommandLineInterface(object):
             parser.error('no message catalogs found')
 
         for idx, (locale, po_file) in enumerate(po_files):
-            mo_file = mo_files[idx]
+            po_file = str(po_file)
+            mo_file = str(mo_files[idx])
             infile = open(po_file, 'r')
             try:
                 catalog = read_po(infile, locale)
@@ -1126,23 +1130,23 @@ def parse_mapping(fileobj, filename=None):
     >>> len(method_map)
     4
 
-    >>> method_map[0]
-    ('**.py', 'python')
+    >>> method_map[0] == ('**.py', 'python')
+    True
     >>> options_map['**.py']
     {}
-    >>> method_map[1]
-    ('**/templates/**.html', 'genshi')
-    >>> options_map['**/templates/**.html']['include_attrs']
-    ''
-    >>> method_map[2]
-    ('**/templates/**.txt', 'genshi')
-    >>> options_map['**/templates/**.txt']['template_class']
-    'genshi.template:TextTemplate'
-    >>> options_map['**/templates/**.txt']['encoding']
-    'latin-1'
+    >>> method_map[1] == ('**/templates/**.html', 'genshi')
+    True
+    >>> options_map['**/templates/**.html']['include_attrs'] == ''
+    True
+    >>> method_map[2] == ('**/templates/**.txt', 'genshi')
+    True
+    >>> options_map['**/templates/**.txt']['template_class'] == 'genshi.template:TextTemplate'
+    True
+    >>> options_map['**/templates/**.txt']['encoding'] == 'latin-1'
+    True
 
-    >>> method_map[3]
-    ('**/custom/*.*', 'mypackage.module:myfunc')
+    >>> method_map[3] == ('**/custom/*.*', 'mypackage.module:myfunc')
+    True
     >>> options_map['**/custom/*.*']
     {}
 
@@ -1179,12 +1183,14 @@ def parse_keywords(strings=[]):
     """Parse keywords specifications from the given list of strings.
 
     >>> kw = sorted(parse_keywords(['_', 'dgettext:2', 'dngettext:2,3', 'pgettext:1c,2']).items())
-    >>> for keyword, indices in sorted(kw):
-    ...     print((keyword, indices))
-    ('_', None)
-    ('dgettext', (2,))
-    ('dngettext', (2, 3))
-    ('pgettext', ((1, 'c'), 2))
+    >>> expected = [
+    ...     ('_', None),
+    ...     ('dgettext', (2,)),
+    ...     ('dngettext', (2, 3)),
+    ...     ('pgettext', ((1, 'c'), 2))
+    ... ]
+    >>> [(keyword, indices) for keyword, indices in sorted(kw)] == expected
+    True
     """
     keywords = {}
     for string in strings:

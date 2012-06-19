@@ -12,6 +12,8 @@
 # individuals. For the exact contribution history, see the revision
 # history and logs, available at http://babel.edgewall.org/log/.
 
+from __future__ import unicode_literals
+
 from optparse import OptionParser
 import os
 import re
@@ -21,7 +23,7 @@ import sys
 sys.path.insert(0, os.path.join(os.path.dirname(sys.argv[0]), '..'))
 
 from babel import dates, numbers
-from babel.compat import pickle, u, text_type, any, ElementTree
+from babel.compat import pickle, text_type, any, ElementTree
 from babel.plural import PluralRule
 from babel.localedata import Alias
 
@@ -35,7 +37,7 @@ def _text(elem):
     for child in elem:
         buf.append(_text(child))
     buf.append(elem.tail or '')
-    return u('').join([_f for _f in buf if _f]).strip()
+    return ''.join([_f for _f in buf if _f]).strip()
 
 
 NAME_RE = re.compile(r"^\w+$")

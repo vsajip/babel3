@@ -11,6 +11,8 @@
 # individuals. For the exact contribution history, see the revision
 # history and logs, available at http://babel.edgewall.org/log/.
 
+from __future__ import unicode_literals
+
 """Reading and writing of files in the ``gettext`` PO (portable object)
 format.
 
@@ -22,7 +24,7 @@ from datetime import datetime
 import os
 import re
 
-from babel.compat import u, text_type
+from babel.compat import text_type
 from babel.messages.catalog import Catalog, Message
 from babel.util import wraptext
 
@@ -102,8 +104,8 @@ def read_po(fileobj, locale=None, domain=None, ignore_obsolete=False):
 
     >>> for message in catalog:
     ...     if message.id:
-    ...         print('id(s): %s' % (isinstance(message.id, tuple) and u(',').join(message.id) or message.id))
-    ...         print('strings(s): %s' % (isinstance(message.string, tuple) and u(',').join(message.string) or message.string))
+    ...         print('id(s): %s' % (isinstance(message.id, tuple) and ','.join(message.id) or message.id))
+    ...         print('strings(s): %s' % (isinstance(message.string, tuple) and ','.join(message.string) or message.string))
     ...         for loc in message.locations:
     ...             print('file: %s line: %d' % loc)
     ...         print('flags: %s' % ' '.join(sorted(message.flags)))
@@ -208,9 +210,9 @@ def read_po(fileobj, locale=None, domain=None, ignore_obsolete=False):
             context.append(line[7:].lstrip())
         elif line.startswith('"'):
             if in_msgid[0]:
-                messages[-1] += u('\n') + line.rstrip()
+                messages[-1] += '\n' + line.rstrip()
             elif in_msgstr[0]:
-                translations[-1][1] += u('\n') + line.rstrip()
+                translations[-1][1] += '\n' + line.rstrip()
             elif in_msgctxt[0]:
                 context.append(line.rstrip())
 
@@ -254,8 +256,8 @@ def read_po(fileobj, locale=None, domain=None, ignore_obsolete=False):
     # No actual messages found, but there was some info in comments, from which
     # we'll construct an empty header message
     elif not counter[0] and (flags or user_comments or auto_comments):
-        messages.append(u(''))
-        translations.append([0, u('')])
+        messages.append('')
+        translations.append([0, ''])
         _add_message()
 
     return catalog
@@ -272,8 +274,8 @@ def escape(string):
 
     >>> escape('''Say:
     ...   "hello, world!"
-    ... ''')
-    '"Say:\\n  \\"hello, world!\\"\\n"'
+    ... ''') == '"Say:\\n  \\"hello, world!\\"\\n"'
+    True
 
     :param string: the string to escape
     :return: the escaped string
@@ -332,7 +334,7 @@ def normalize(string, prefix='', width=76):
                                 # separate line
                                 buf.append(chunks.pop())
                             break
-                    lines.append(u('').join(buf))
+                    lines.append(''.join(buf))
             else:
                 lines.append(line)
     else:
@@ -345,7 +347,7 @@ def normalize(string, prefix='', width=76):
     if lines and not lines[-1]:
         del lines[-1]
         lines[-1] += '\n'
-    return u('""\n') + u('\n').join([(prefix + escape(l)) for l in lines])
+    return '""\n' + '\n'.join([(prefix + escape(l)) for l in lines])
 
 def write_po(fileobj, catalog, width=76, no_location=False, omit_header=False,
              sort_output=False, sort_by_file=False, ignore_obsolete=False,
@@ -354,10 +356,10 @@ def write_po(fileobj, catalog, width=76, no_location=False, omit_header=False,
     message catalog to the provided file-like object.
 
     >>> catalog = Catalog()
-    >>> catalog.add(u('foo %(name)s'), locations=[('main.py', 1)],
+    >>> catalog.add('foo %(name)s', locations=[('main.py', 1)],
     ...             flags=('fuzzy',))
     <Message...>
-    >>> catalog.add((u('bar'), u('baz')), locations=[('main.py', 3)])
+    >>> catalog.add(('bar', 'baz'), locations=[('main.py', 3)])
     <Message...>
     >>> from babel.compat import BytesIO
     >>> buf = BytesIO()
@@ -453,7 +455,7 @@ def write_po(fileobj, catalog, width=76, no_location=False, omit_header=False,
                 for line in comment_header.splitlines():
                     lines += wraptext(line, width=width,
                                       subsequent_indent='# ')
-                comment_header = u('\n').join(lines) + u('\n')
+                comment_header = '\n'.join(lines) + '\n'
             _write(comment_header)
 
         for comment in message.user_comments:
@@ -462,7 +464,7 @@ def write_po(fileobj, catalog, width=76, no_location=False, omit_header=False,
             _write_comment(comment, prefix='.')
 
         if not no_location:
-            locs = u(' ').join([u('%s:%d') % (filename.replace(os.sep, '/'), lineno)
+            locs = ' '.join(['%s:%d' % (filename.replace(os.sep, '/'), lineno)
                               for filename, lineno in message.locations])
             _write_comment(locs, prefix=':')
         if message.flags:

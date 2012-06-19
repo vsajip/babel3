@@ -11,6 +11,8 @@
 # individuals. For the exact contribution history, see the revision
 # history and logs, available at http://babel.edgewall.org/log/.
 
+from __future__ import unicode_literals
+
 """Various utility classes and functions."""
 
 import codecs
@@ -21,7 +23,7 @@ import sys
 import textwrap
 import time
 
-from babel.compat import PY3, binary_type, text_type, b
+from babel.compat import PY3, text_type
 
 missing = object()
 
@@ -38,8 +40,8 @@ def distinct(iterable):
 
     >>> print(list(distinct([1, 2, 1, 3, 4, 4])))
     [1, 2, 3, 4]
-    >>> print(list(distinct('foobar')))
-    ['f', 'o', 'b', 'a', 'r']
+    >>> list(distinct('foobar')) == ['f', 'o', 'b', 'a', 'r']
+    True
 
     :param iterable: the iterable collection providing the data
     :return: the distinct items in the collection
@@ -53,7 +55,7 @@ def distinct(iterable):
 
 # Regexp to match python magic encoding line
 PYTHON_MAGIC_COMMENT_re = re.compile(
-    b(r'[ \t\f]* \# .* coding[=:][ \t]*([-\w.]+)'), re.VERBOSE)
+    br'[ \t\f]* \# .* coding[=:][ \t]*([-\w.]+)', re.VERBOSE)
 def parse_encoding(fp):
     """Deduce the encoding of a source file from magic comment.
 

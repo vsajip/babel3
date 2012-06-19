@@ -11,12 +11,14 @@
 # individuals. For the exact contribution history, see the revision
 # history and logs, available at http://babel.edgewall.org/log/.
 
+from __future__ import unicode_literals
+
 import codecs
 import doctest
 import sys
 import unittest
 
-from babel.compat import StringIO, BytesIO, u, b
+from babel.compat import StringIO, BytesIO
 from babel.messages import extract
 
 
@@ -41,14 +43,14 @@ msg10 = dngettext(getDomain(), 'Page', 'Pages', 3)
         self.assertEqual([
                 (1, '_', None, []),
                 (2, 'ungettext', (None, None, None), []),
-                (3, 'ungettext', (u('Babel'), None, None), []),
-                (4, 'ungettext', (None, u('Babels'), None), []),
-                (5, 'ungettext', (u('bunny'), u('bunnies'), None), []),
-                (6, 'ungettext', (None, u('bunnies'), None), []),
+                (3, 'ungettext', ('Babel', None, None), []),
+                (4, 'ungettext', (None, 'Babels', None), []),
+                (5, 'ungettext', ('bunny', 'bunnies', None), []),
+                (6, 'ungettext', (None, 'bunnies', None), []),
                 (7, '_', None, []),
-                (8, 'gettext', u('Rabbit'), []),
-                (9, 'dgettext', (u('wiki'), None), []),
-                (10, 'dngettext', (None, u('Page'), u('Pages'), None), [])],
+                (8, 'gettext', 'Rabbit', []),
+                (9, 'dgettext', ('wiki', None), []),
+                (10, 'dngettext', (None, 'Page', 'Pages', None), [])],
                          messages)
 
     def test_nested_comments(self):
@@ -59,7 +61,7 @@ msg = ngettext('pylon',  # TRANSLATORS: shouldn't be
 """)
         messages = list(extract.extract_python(buf, ('ngettext',),
                                                ['TRANSLATORS:'], {}))
-        self.assertEqual([(1, 'ngettext', (u('pylon'), u('pylons'), None), [])],
+        self.assertEqual([(1, 'ngettext', ('pylon', 'pylons', None), [])],
                          messages)
 
     def test_comments_with_calls_that_spawn_multiple_lines(self):
@@ -84,22 +86,22 @@ add_notice(req, ngettext("Bar deleted.",
 
                                                {'strip_comment_tags':False}))
         self.assertEqual((6, '_', 'Locale deleted.',
-                          [u('NOTE: This Comment SHOULD Be Extracted')]),
+                          ['NOTE: This Comment SHOULD Be Extracted']),
                          messages[1])
-        self.assertEqual((10, 'ngettext', (u('Foo deleted.'), u('Foos deleted.'),
+        self.assertEqual((10, 'ngettext', ('Foo deleted.', 'Foos deleted.',
                                            None),
-                          [u('NOTE: This Comment SHOULD Be Extracted')]),
+                          ['NOTE: This Comment SHOULD Be Extracted']),
                          messages[2])
         self.assertEqual((3, 'ngettext',
-                           (u('Catalog deleted.'),
-                            u('Catalogs deleted.'), None),
-                           [u('NOTE: This Comment SHOULD Be Extracted')]),
+                           ('Catalog deleted.',
+                            'Catalogs deleted.', None),
+                           ['NOTE: This Comment SHOULD Be Extracted']),
                          messages[0])
-        self.assertEqual((15, 'ngettext', (u('Bar deleted.'), u('Bars deleted.'),
+        self.assertEqual((15, 'ngettext', ('Bar deleted.', 'Bars deleted.',
                                            None),
-                          [u('NOTE: This Comment SHOULD Be Extracted'),
-                           u('NOTE: And This One Too')]),
-                         messages[3])
+                          ['NOTE: This Comment SHOULD Be Extracted',
+                           'NOTE: And This One Too']),
+                          messages[3])
 
     def test_declarations(self):
         buf = StringIO("""\
@@ -115,9 +117,9 @@ class Meta:
         messages = list(extract.extract_python(buf,
                                                list(extract.DEFAULT_KEYWORDS.keys()),
                                                [], {}))
-        self.assertEqual([(3, '_', u('Page arg 1'), []),
-                          (3, '_', u('Page arg 2'), []),
-                          (8, '_', u('log entry'), [])],
+        self.assertEqual([(3, '_', 'Page arg 1', []),
+                          (3, '_', 'Page arg 2', []),
+                          (8, '_', 'log entry', [])],
                          messages)
 
     def test_multiline(self):
@@ -129,8 +131,8 @@ msg2 = ngettext('elvis',
                  count)
 """)
         messages = list(extract.extract_python(buf, ('ngettext',), [], {}))
-        self.assertEqual([(1, 'ngettext', (u('pylon'), u('pylons'), None), []),
-                          (3, 'ngettext', (u('elvis'), u('elvises'), None), [])],
+        self.assertEqual([(1, 'ngettext', ('pylon', 'pylons', None), []),
+                          (3, 'ngettext', ('elvis', 'elvises', None), [])],
                          messages)
 
     def test_triple_quoted_strings(self):
@@ -142,9 +144,9 @@ msg2 = ngettext(\"\"\"elvis\"\"\", 'elvises', count)
         messages = list(extract.extract_python(buf,
                                                extract.DEFAULT_KEYWORDS.keys(),
                                                [], {}))
-        self.assertEqual([(1, '_', (u('pylons')), []),
-                          (2, 'ngettext', (u('elvis'), u('elvises'), None), []),
-                          (3, 'ngettext', (u('elvis'), u('elvises'), None), [])],
+        self.assertEqual([(1, '_', ('pylons'), []),
+                          (2, 'ngettext', ('elvis', 'elvises', None), []),
+                          (3, 'ngettext', ('elvis', 'elvises', None), [])],
                          messages)
 
     def test_multiline_strings(self):
@@ -158,9 +160,9 @@ gettext message catalog library.''')
                                                [], {}))
         self.assertEqual(
             [(1, '_',
-              u('This module provides internationalization and localization\n'
+              'This module provides internationalization and localization\n'
               'support for your Python programs by providing an interface to '
-              'the GNU\ngettext message catalog library.'), [])],
+              'the GNU\ngettext message catalog library.', [])],
             messages)
 
     def test_concatenated_strings(self):
@@ -170,12 +172,12 @@ foobar = _('foo' 'bar')
         messages = list(extract.extract_python(buf,
                                                list(extract.DEFAULT_KEYWORDS.keys()),
                                                [], {}))
-        self.assertEqual(u('foobar'), messages[0][2])
+        self.assertEqual('foobar', messages[0][2])
 
     def test_unicode_string_arg(self):
         buf = StringIO("msg = _(u'Foo Bar')")
         messages = list(extract.extract_python(buf, ('_',), [], {}))
-        self.assertEqual(u('Foo Bar'), messages[0][2])
+        self.assertEqual('Foo Bar', messages[0][2])
 
     def test_comment_tag(self):
         buf = StringIO("""
@@ -183,8 +185,8 @@ foobar = _('foo' 'bar')
 msg = _(u'Foo Bar')
 """)
         messages = list(extract.extract_python(buf, ('_',), ['NOTE:'], {}))
-        self.assertEqual(u('Foo Bar'), messages[0][2])
-        self.assertEqual([u('NOTE: A translation comment')], messages[0][3])
+        self.assertEqual('Foo Bar', messages[0][2])
+        self.assertEqual(['NOTE: A translation comment'], messages[0][3])
 
     def test_comment_tag_multiline(self):
         buf = StringIO("""
@@ -193,8 +195,8 @@ msg = _(u'Foo Bar')
 msg = _(u'Foo Bar')
 """)
         messages = list(extract.extract_python(buf, ('_',), ['NOTE:'], {}))
-        self.assertEqual(u('Foo Bar'), messages[0][2])
-        self.assertEqual([u('NOTE: A translation comment'), u('with a second line')],
+        self.assertEqual('Foo Bar', messages[0][2])
+        self.assertEqual(['NOTE: A translation comment', 'with a second line'],
                          messages[0][3])
 
     def test_translator_comments_with_previous_non_translator_comments(self):
@@ -206,8 +208,8 @@ msg = _(u'Foo Bar')
 msg = _(u'Foo Bar')
 """)
         messages = list(extract.extract_python(buf, ('_',), ['NOTE:'], {}))
-        self.assertEqual(u('Foo Bar'), messages[0][2])
-        self.assertEqual([u('NOTE: A translation comment'), u('with a second line')],
+        self.assertEqual('Foo Bar', messages[0][2])
+        self.assertEqual(['NOTE: A translation comment', 'with a second line'],
                          messages[0][3])
 
     def test_comment_tags_not_on_start_of_comment(self):
@@ -219,8 +221,8 @@ msg = _(u'Foo Bar')
 msg = _(u'Foo Bar')
 """)
         messages = list(extract.extract_python(buf, ('_',), ['NOTE:'], {}))
-        self.assertEqual(u('Foo Bar'), messages[0][2])
-        self.assertEqual([u('NOTE: This one will be')], messages[0][3])
+        self.assertEqual('Foo Bar', messages[0][2])
+        self.assertEqual(['NOTE: This one will be'], messages[0][3])
 
     def test_multiple_comment_tags(self):
         buf = StringIO("""
@@ -233,11 +235,11 @@ msg = _(u'Foo Bar2')
 """)
         messages = list(extract.extract_python(buf, ('_',),
                                                ['NOTE1:', 'NOTE2:'], {}))
-        self.assertEqual(u('Foo Bar1'), messages[0][2])
-        self.assertEqual([u('NOTE1: A translation comment for tag1'),
-                          u('with a second line')], messages[0][3])
-        self.assertEqual(u('Foo Bar2'), messages[1][2])
-        self.assertEqual([u('NOTE2: A translation comment for tag2')], messages[1][3])
+        self.assertEqual('Foo Bar1', messages[0][2])
+        self.assertEqual(['NOTE1: A translation comment for tag1',
+                          'with a second line'], messages[0][3])
+        self.assertEqual('Foo Bar2', messages[1][2])
+        self.assertEqual(['NOTE2: A translation comment for tag2'], messages[1][3])
 
     def test_two_succeeding_comments(self):
         buf = StringIO("""
@@ -246,8 +248,8 @@ msg = _(u'Foo Bar2')
 msg = _(u'Foo Bar')
 """)
         messages = list(extract.extract_python(buf, ('_',), ['NOTE:'], {}))
-        self.assertEqual(u('Foo Bar'), messages[0][2])
-        self.assertEqual([u('NOTE: one'), u('NOTE: two')], messages[0][3])
+        self.assertEqual('Foo Bar', messages[0][2])
+        self.assertEqual(['NOTE: one', 'NOTE: two'], messages[0][3])
 
     def test_invalid_translator_comments(self):
         buf = StringIO("""
@@ -257,7 +259,7 @@ hello = 'there'
 msg = _(u'Foo Bar')
 """)
         messages = list(extract.extract_python(buf, ('_',), ['NOTE:'], {}))
-        self.assertEqual(u('Foo Bar'), messages[0][2])
+        self.assertEqual('Foo Bar', messages[0][2])
         self.assertEqual([], messages[0][3])
 
     def test_invalid_translator_comments2(self):
@@ -272,9 +274,9 @@ rows = [[v for v in range(0,10)] for row in range(0,10)]
 hello = _('Hello')
 """)
         messages = list(extract.extract_python(buf, ('_',), ['NOTE:'], {}))
-        self.assertEqual(u('Hi there!'), messages[0][2])
-        self.assertEqual([u('NOTE: Hi!')], messages[0][3])
-        self.assertEqual(u('Hello'), messages[1][2])
+        self.assertEqual('Hi there!', messages[0][2])
+        self.assertEqual(['NOTE: Hi!'], messages[0][3])
+        self.assertEqual('Hello', messages[1][2])
         self.assertEqual([], messages[1][3])
 
     def test_invalid_translator_comments3(self):
@@ -285,7 +287,7 @@ hello = _('Hello')
 hithere = _('Hi there!')
 """)
         messages = list(extract.extract_python(buf, ('_',), ['NOTE:'], {}))
-        self.assertEqual(u('Hi there!'), messages[0][2])
+        self.assertEqual('Hi there!', messages[0][2])
         self.assertEqual([], messages[0][3])
 
     def test_comment_tag_with_leading_space(self):
@@ -295,8 +297,8 @@ hithere = _('Hi there!')
 msg = _(u'Foo Bar')
 """)
         messages = list(extract.extract_python(buf, ('_',), [':'], {}))
-        self.assertEqual(u('Foo Bar'), messages[0][2])
-        self.assertEqual([u(': A translation comment'), u(': with leading spaces')],
+        self.assertEqual('Foo Bar', messages[0][2])
+        self.assertEqual([': A translation comment', ': with leading spaces'],
                          messages[0][3])
 
     def test_different_signatures(self):
@@ -309,9 +311,9 @@ n = ngettext()
 n = ngettext('foo')
 """)
         messages = list(extract.extract_python(buf, ('_', 'ngettext'), [], {}))
-        self.assertEqual((u('foo'), u('bar')), messages[0][2])
-        self.assertEqual((u('hello'), u('there'), None), messages[1][2])
-        self.assertEqual((None, u('hello'), u('there')), messages[2][2])
+        self.assertEqual(('foo', 'bar'), messages[0][2])
+        self.assertEqual(('hello', 'there', None), messages[1][2])
+        self.assertEqual((None, 'hello', 'there'), messages[2][2])
         self.assertEqual((None, None), messages[3][2])
         self.assertEqual(None, messages[4][2])
         self.assertEqual(('foo'), messages[5][2])
@@ -323,8 +325,8 @@ msg = _('Bonjour à tous')
 """)
         messages = list(extract.extract_python(buf, ('_',), ['NOTE:'],
                                                {'encoding': 'utf-8'}))
-        self.assertEqual(u('Bonjour \xe0 tous'), messages[0][2])
-        self.assertEqual([u('NOTE: hello')], messages[0][3])
+        self.assertEqual('Bonjour \xe0 tous', messages[0][2])
+        self.assertEqual(['NOTE: hello'], messages[0][3])
 
     def test_utf8_message_with_magic_comment(self):
         buf = StringIO("""# -*- coding: utf-8 -*-
@@ -332,25 +334,25 @@ msg = _('Bonjour à tous')
 msg = _('Bonjour à tous')
 """)
         messages = list(extract.extract_python(buf, ('_',), ['NOTE:'], {}))
-        self.assertEqual(u('Bonjour \xe0 tous'), messages[0][2])
-        self.assertEqual([u('NOTE: hello')], messages[0][3])
+        self.assertEqual('Bonjour \xe0 tous', messages[0][2])
+        self.assertEqual(['NOTE: hello'], messages[0][3])
 
     def test_utf8_message_with_utf8_bom(self):
-        buf = BytesIO(codecs.BOM_UTF8 + u("""
+        buf = BytesIO(codecs.BOM_UTF8 + """
 # NOTE: hello
 msg = _('Bonjour \xe0 tous')
-""").encode('utf-8'))
+""".encode('utf-8'))
         messages = list(extract.extract_python(buf, ('_',), ['NOTE:'], {}))
-        self.assertEqual(u('Bonjour \xe0 tous'), messages[0][2])
-        self.assertEqual([u('NOTE: hello')], messages[0][3])
+        self.assertEqual('Bonjour \xe0 tous', messages[0][2])
+        self.assertEqual(['NOTE: hello'], messages[0][3])
 
     def test_utf8_raw_strings_match_unicode_strings(self):
-        buf = BytesIO(codecs.BOM_UTF8 + u("""
+        buf = BytesIO(codecs.BOM_UTF8 + """
 msg = _('Bonjour \xe0 tous')
 msgu = _(u'Bonjour \xe0 tous')
-""").encode('utf-8'))
+""".encode('utf-8'))
         messages = list(extract.extract_python(buf, ('_',), ['NOTE:'], {}))
-        self.assertEqual(u('Bonjour \xe0 tous'), messages[0][2])
+        self.assertEqual('Bonjour \xe0 tous', messages[0][2])
         self.assertEqual(messages[0][2], messages[1][2])
 
     def test_extract_strip_comment_tags(self):
@@ -364,12 +366,12 @@ _('Servus')
 _('Babatschi')""")
         messages = list(extract.extract('python', buf, comment_tags=['NOTE:', ':'],
                                         strip_comment_tags=True))
-        self.assertEqual(u('Servus'), messages[0][1])
-        self.assertEqual([u('This is a comment with a very simple'),
-                          u('prefix specified')], messages[0][2])
-        self.assertEqual(u('Babatschi'), messages[1][1])
-        self.assertEqual([u('This is a multiline comment with'),
-                          u('a prefix too')], messages[1][2])
+        self.assertEqual('Servus', messages[0][1])
+        self.assertEqual(['This is a comment with a very simple',
+                          'prefix specified'], messages[0][2])
+        self.assertEqual('Babatschi', messages[1][1])
+        self.assertEqual(['This is a multiline comment with',
+                          'a prefix too'], messages[1][2])
 
 
 class ExtractJavaScriptTestCase(unittest.TestCase):
@@ -404,9 +406,9 @@ msg10 = dngettext(domain, 'Page', 'Pages', 3)
         messages = \
             list(extract.extract('javascript', buf, extract.DEFAULT_KEYWORDS, [],
                                  {}))
-        self.assertEqual([(5, (u('bunny'), u('bunnies')), [], None),
-                          (8, u('Rabbit'), [], None),
-                          (10, (u('Page'), u('Pages')), [], None)], messages)
+        self.assertEqual([(5, ('bunny', 'bunnies'), [], None),
+                          (8, 'Rabbit', [], None),
+                          (10, ('Page', 'Pages'), [], None)], messages)
 
     def test_message_with_line_comment(self):
         buf = StringIO("""\
@@ -414,8 +416,8 @@ msg10 = dngettext(domain, 'Page', 'Pages', 3)
 msg = _('Bonjour à tous')
 """)
         messages = list(extract.extract_javascript(buf, ('_',), ['NOTE:'], {}))
-        self.assertEqual(u('Bonjour \xe0 tous'), messages[0][2])
-        self.assertEqual([u('NOTE: hello')], messages[0][3])
+        self.assertEqual('Bonjour \xe0 tous', messages[0][2])
+        self.assertEqual(['NOTE: hello'], messages[0][3])
 
     def test_message_with_multiline_comment(self):
         buf = StringIO("""\
@@ -425,8 +427,8 @@ msg = _('Bonjour à tous')
 msg = _('Bonjour à tous')
 """)
         messages = list(extract.extract_javascript(buf, ('_',), ['NOTE:'], {}))
-        self.assertEqual(u('Bonjour \xe0 tous'), messages[0][2])
-        self.assertEqual([u('NOTE: hello'), 'and bonjour', '  and servus'], messages[0][3])
+        self.assertEqual('Bonjour \xe0 tous', messages[0][2])
+        self.assertEqual(['NOTE: hello', 'and bonjour', '  and servus'], messages[0][3])
 
     def test_ignore_function_definitions(self):
         buf = StringIO("""\
@@ -455,11 +457,11 @@ bar()
 _('no comment here')
 """)
         messages = list(extract.extract_javascript(buf, ('_',), ['NOTE:'], {}))
-        self.assertEqual(u('Something'), messages[0][2])
-        self.assertEqual([u('NOTE: this will')], messages[0][3])
-        self.assertEqual(u('Something else'), messages[1][2])
-        self.assertEqual([u('NOTE: this will show up'), 'too.'], messages[1][3])
-        self.assertEqual(u('no comment here'), messages[2][2])
+        self.assertEqual('Something', messages[0][2])
+        self.assertEqual(['NOTE: this will'], messages[0][3])
+        self.assertEqual('Something else', messages[1][2])
+        self.assertEqual(['NOTE: this will show up', 'too.'], messages[1][3])
+        self.assertEqual('no comment here', messages[2][2])
         self.assertEqual([], messages[2][3])
 
 
@@ -481,9 +483,9 @@ msg10 = dngettext(domain, 'Page', 'Pages', 3)
         messages = \
             list(extract.extract('python', buf, extract.DEFAULT_KEYWORDS, [],
                                  {}))
-        self.assertEqual([(5, (u('bunny'), u('bunnies')), [], None),
-                          (8, u('Rabbit'), [], None),
-                          (10, (u('Page'), u('Pages')), [], None)], messages)
+        self.assertEqual([(5, ('bunny', 'bunnies'), [], None),
+                          (8, 'Rabbit', [], None),
+                          (10, ('Page', 'Pages'), [], None)], messages)
 
     def test_invalid_extract_method(self):
         buf = StringIO('')
@@ -502,8 +504,8 @@ n = ngettext('foo')
             list(extract.extract('python', buf, extract.DEFAULT_KEYWORDS, [],
                                  {}))
         self.assertEqual(len(messages), 2)
-        self.assertEqual(u('foo'), messages[0][1])
-        self.assertEqual((u('hello'), u('there')), messages[1][1])
+        self.assertEqual('foo', messages[0][1])
+        self.assertEqual(('hello', 'there'), messages[1][1])
 
     def test_empty_string_msgid(self):
         buf = StringIO("""\
