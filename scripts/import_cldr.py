@@ -18,12 +18,13 @@ from optparse import OptionParser
 import os
 import re
 import sys
+from xml.etree import ElementTree
 
 # Make sure we're using Babel source, and not some previously installed version
 sys.path.insert(0, os.path.join(os.path.dirname(sys.argv[0]), '..'))
 
 from babel import dates, numbers
-from babel.compat import pickle, text_type, any, ElementTree
+from babel.compat import pickle, text_type
 from babel.plural import PluralRule
 from babel.localedata import Alias
 
