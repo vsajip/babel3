@@ -43,11 +43,17 @@ def unescape(string):
     :return: the unescaped string
     :rtype: `str` or `unicode`
     """
-    return string[1:-1].replace('\\\\', '\\') \
-                       .replace('\\t', '\t') \
-                       .replace('\\r', '\r') \
-                       .replace('\\n', '\n') \
-                       .replace('\\"', '\"')
+    def replace_escapes(match):
+        m = match.group(1)
+        if m == 'n':
+            return '\n'
+        elif m == 't':
+            return '\t'
+        elif m == 'r':
+            return '\r'
+        # m is \ or "
+        return m
+    return re.compile(r'\\([\\trn"])').sub(replace_escapes, string[1:-1])
 
 def denormalize(string):
     r"""Reverse the normalization done by the `normalize` function.
@@ -72,10 +78,11 @@ def denormalize(string):
     :return: the denormalized string
     :rtype: `unicode` or `str`
     """
-    if string.startswith('""'):
-        lines = []
-        for line in string.splitlines()[1:]:
-            lines.append(unescape(line))
+    if '\n' in string:
+        escaped_lines = string.splitlines()
+        if string.startswith('""'):
+            escaped_lines = escaped_lines[1:]
+        lines = map(unescape, escaped_lines)
         return ''.join(lines)
     else:
         return unescape(string)
@@ -89,40 +96,32 @@ def read_po(fileobj, locale=None, domain=None, ignore_obsolete=False):
     ... #: main.py:1
     ... #, fuzzy, python-format
     ... msgid "foo %(name)s"
-    ... msgstr ""
+    ... msgstr "quux %(name)s"
     ...
     ... # A user comment
     ... #. An auto comment
     ... #: main.py:3
     ... msgid "bar"
     ... msgid_plural "baz"
-    ... msgstr[0] ""
-    ... msgstr[1] ""
+    ... msgstr[0] "bar"
+    ... msgstr[1] "baaz"
     ... ''')
     >>> catalog = read_po(buf)
-    >>> catalog.revision_date = datetime(2007, 4, 1)
+    >>> catalog.revision_date = datetime(2007, 0o4, 0o1)
 
     >>> for message in catalog:
     ...     if message.id:
-    ...         print('id(s): %s' % (isinstance(message.id, tuple) and ','.join(message.id) or message.id))
-    ...         print('strings(s): %s' % (isinstance(message.string, tuple) and ','.join(message.string) or message.string))
-    ...         for loc in message.locations:
-    ...             print('file: %s line: %d' % loc)
-    ...         print('flags: %s' % ' '.join(sorted(message.flags)))
-    ...         print('user comments: %s' % ','.join(message.user_comments))
-    ...         print('auto comments: %s' % ','.join(message.auto_comments))
-    id(s): foo %(name)s
-    strings(s): 
-    file: main.py line: 1
-    flags: fuzzy python-format
-    user comments: 
-    auto comments: 
-    id(s): bar,baz
-    strings(s): ,
-    file: main.py line: 3
-    flags: 
-    user comments: A user comment
-    auto comments: An auto comment
+    ...         print("'%s' '%s'" % (message.id, message.string))
+    ...         print('%s %s' % message.locations[0])
+    ...         print('%s' % ' '.join(message.flags))
+    ...         print("'%s' '%s'" % (message.user_comments, message.auto_comments))
+    'foo %(name)s' 'quux %(name)s'
+    main.py 1
+    fuzzy python-format
+    '[]' '[]'
+    (('bar', 'baz'), ('bar', 'baaz'))
+      ([('main.py', 3)], set([]))
+      (['A user comment'], ['An auto comment'])
 
     :param fileobj: the file-like object to read the PO file from
     :param locale: the locale identifier or `Locale` object, or `None`
@@ -455,8 +454,8 @@ def write_po(fileobj, catalog, width=76, no_location=False, omit_header=False,
                 for line in comment_header.splitlines():
                     lines += wraptext(line, width=width,
                                       subsequent_indent='# ')
-                comment_header = '\n'.join(lines) + '\n'
-            _write(comment_header)
+                comment_header = '\n'.join(lines)
+            _write(comment_header + '\n')
 
         for comment in message.user_comments:
             _write_comment(comment)
@@ -487,3 +486,4 @@ def write_po(fileobj, catalog, width=76, no_location=False, omit_header=False,
                 _write_comment(comment)
             _write_message(message, prefix='#~ ')
             _write('\n')
+

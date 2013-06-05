@@ -24,6 +24,7 @@ from locale import getpreferredencoding
 import logging
 from optparse import OptionParser
 import os
+import re
 import shutil
 import sys
 import tempfile
@@ -222,11 +223,12 @@ class extract_messages(Command):
          'set copyright holder in output'),
         ('add-comments=', 'c',
          'place comment block with TAG (or those preceding keyword lines) in '
-         'output file. Seperate multiple TAGs with commas(,)'),
+         'output file. Separate multiple TAGs with commas(,)'),
         ('strip-comments', None,
          'strip the comment TAGs from the comments.'),
         ('input-dirs=', None,
-         'directories that should be scanned for messages'),
+         'directories that should be scanned for messages. Separate multiple '
+         'directories with commas(,)'),
     ]
     boolean_options = [
         'no-default-keywords', 'no-location', 'omit-header', 'no-wrap',
@@ -276,7 +278,9 @@ class extract_messages(Command):
             raise DistutilsOptionError("'--sort-output' and '--sort-by-file' "
                                        "are mutually exclusive")
 
-        if not self.input_dirs:
+        if self.input_dirs:
+            self.input_dirs = re.split(',\s*', self.input_dirs)
+        else:
             self.input_dirs = list(dict.fromkeys([k.split('.',1)[0]
                 for k in self.distribution.packages
             ]).keys())
@@ -404,7 +408,13 @@ class init_catalog(Command):
          "'<output_dir>/<locale>/LC_MESSAGES/<domain>.po')"),
         ('locale=', 'l',
          'locale for the new localized catalog'),
+        ('width=', 'w',
+         'set output line width (default 76)'),
+        ('no-wrap', None,
+         'do not break long message lines, longer than the output line width, '
+         'into several lines'),
     ]
+    boolean_options = ['no-wrap']
 
     def initialize_options(self):
         self.output_dir = None
@@ -412,6 +422,8 @@ class init_catalog(Command):
         self.input_file = None
         self.locale = None
         self.domain = 'messages'
+        self.no_wrap = False
+        self.width = None
 
     def finalize_options(self):
         if not self.input_file:
@@ -422,8 +434,8 @@ class init_catalog(Command):
                                        'new catalog')
         try:
             self._locale = Locale.parse(self.locale)
-        except UnknownLocaleError:
-            raise DistutilsOptionError(sys.exc_info()[1])
+        except UnknownLocaleError as e:
+            raise DistutilsOptionError(e)
 
         if not self.output_file and not self.output_dir:
             raise DistutilsOptionError('you must specify the output directory')
@@ -433,6 +445,13 @@ class init_catalog(Command):
 
         if not os.path.exists(os.path.dirname(self.output_file)):
             os.makedirs(os.path.dirname(self.output_file))
+        if self.no_wrap and self.width:
+            raise DistutilsOptionError("'--no-wrap' and '--width' are mutually "
+                                       "exclusive")
+        if not self.no_wrap and not self.width:
+            self.width = 76
+        elif self.width is not None:
+            self.width = int(self.width)
 
     def run(self):
         log.info('creating catalog %r based on %r', self.output_file,
@@ -447,11 +466,12 @@ class init_catalog(Command):
             infile.close()
 
         catalog.locale = self._locale
+        catalog.revision_date = datetime.now(LOCALTZ)
         catalog.fuzzy = False
 
         outfile = open(self.output_file, 'wb')
         try:
-            write_po(outfile, catalog)
+            write_po(outfile, catalog, width=self.width)
         finally:
             outfile.close()
 
@@ -488,6 +508,11 @@ class update_catalog(Command):
          "'<output_dir>/<locale>/LC_MESSAGES/<domain>.po')"),
         ('locale=', 'l',
          'locale of the catalog to compile'),
+        ('width=', 'w',
+         'set output line width (default 76)'),
+        ('no-wrap', None,
+         'do not break long message lines, longer than the output line width, '
+         'into several lines'),
         ('ignore-obsolete=', None,
          'whether to omit obsolete messages from the output'),
         ('no-fuzzy-matching', 'N',
@@ -503,6 +528,8 @@ class update_catalog(Command):
         self.output_dir = None
         self.output_file = None
         self.locale = None
+        self.width = None
+        self.no_wrap = False
         self.ignore_obsolete = False
         self.no_fuzzy_matching = False
         self.previous = False
@@ -515,6 +542,13 @@ class update_catalog(Command):
                                        'directory')
         if self.output_file and not self.locale:
             raise DistutilsOptionError('you must specify the locale')
+        if self.no_wrap and self.width:
+            raise DistutilsOptionError("'--no-wrap' and '--width' are mutually "
+                                       "exclusive")
+        if not self.no_wrap and not self.width:
+            self.width = 76
+        elif self.width is not None:
+            self.width = int(self.width)
         if self.no_fuzzy_matching and self.previous:
             self.previous = False
 
@@ -568,7 +602,7 @@ class update_catalog(Command):
                 try:
                     write_po(tmpfile, catalog,
                              ignore_obsolete=self.ignore_obsolete,
-                             include_previous=self.previous)
+                             include_previous=self.previous, width=self.width)
                 finally:
                     tmpfile.close()
             except:
@@ -944,6 +978,11 @@ class CommandLineInterface(object):
                                "<domain>.po')")
         parser.add_option('--locale', '-l', dest='locale', metavar='LOCALE',
                           help='locale for the new localized catalog')
+        parser.add_option('-w', '--width', dest='width', type='int',
+                          help="set output line width (default 76)")
+        parser.add_option('--no-wrap', dest='no_wrap', action='store_true',
+                          help='do not break long message lines, longer than '
+                               'the output line width, into several lines')
 
         parser.set_defaults(domain='messages')
         options, args = parser.parse_args(argv)
@@ -952,8 +991,8 @@ class CommandLineInterface(object):
             parser.error('you must provide a locale for the new catalog')
         try:
             locale = Locale.parse(options.locale)
-        except UnknownLocaleError:
-            parser.error(sys.exc_info()[1])
+        except UnknownLocaleError as e:
+            parser.error(e)
 
         if not options.input_file:
             parser.error('you must specify the input file')
@@ -967,6 +1006,10 @@ class CommandLineInterface(object):
                                                options.domain + '.po')
         if not os.path.exists(os.path.dirname(options.output_file)):
             os.makedirs(os.path.dirname(options.output_file))
+        if options.width and options.no_wrap:
+            parser.error("'--no-wrap' and '--width' are mutually exclusive.")
+        elif not options.width and not options.no_wrap:
+            options.width = 76
 
         infile = open(options.input_file, 'r')
         try:
@@ -984,7 +1027,7 @@ class CommandLineInterface(object):
 
         outfile = open(options.output_file, 'wb')
         try:
-            write_po(outfile, catalog)
+            write_po(outfile, catalog, width=options.width)
         finally:
             outfile.close()
 
@@ -1009,6 +1052,11 @@ class CommandLineInterface(object):
                                "<domain>.po')")
         parser.add_option('--locale', '-l', dest='locale', metavar='LOCALE',
                           help='locale of the translations catalog')
+        parser.add_option('-w', '--width', dest='width', type='int',
+                          help="set output line width (default 76)")
+        parser.add_option('--no-wrap', dest='no_wrap', action = 'store_true',
+                          help='do not break long message lines, longer than '
+                               'the output line width, into several lines')
         parser.add_option('--ignore-obsolete', dest='ignore_obsolete',
                           action='store_true',
                           help='do not include obsolete messages in the output '
@@ -1063,6 +1111,10 @@ class CommandLineInterface(object):
         if not po_files:
             parser.error('no message catalogs found')
 
+        if options.width and options.no_wrap:
+            parser.error("'--no-wrap' and '--width' are mutually exclusive.")
+        elif not options.width and not options.no_wrap:
+            options.width = 76
         for locale, filename in po_files:
             self.log.info('updating catalog %r based on %r', filename,
                           options.input_file)
@@ -1082,7 +1134,8 @@ class CommandLineInterface(object):
                 try:
                     write_po(tmpfile, catalog,
                              ignore_obsolete=options.ignore_obsolete,
-                             include_previous=options.previous)
+                             include_previous=options.previous, 
+                             width=options.width)
                 finally:
                     tmpfile.close()
             except:
@@ -1213,3 +1266,4 @@ def parse_keywords(strings=[]):
 
 if __name__ == '__main__':
     main()
+

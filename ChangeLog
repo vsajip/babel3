@@ -1,6 +1,6 @@
 Version 1.0
 http://svn.edgewall.org/repos/babel/tags/1.0.0/
-(? ? 2011 from trunk)
+(? ? 2012 from trunk)
 
  * Added support for the locale plural rules defined by the CLDR.
  * Added `format_timedelta` function to support localized formatting of
@@ -38,6 +38,28 @@ http://svn.edgewall.org/repos/babel/tags/1.0.0/
    Algarvio)
  * Support for context-aware methods during message extraction (#229, patch
    from David Rios)
+ * "init" and "update" commands support "--no-wrap" option (#289)
+ * fix formatting of fraction in format_decimal() if the input value is a float
+   with more than 7 significant digits (#183)
+ * fix format_date() with datetime parameter (#282, patch from Xavier Morel)
+ * fix format_decimal() with small Decimal values (#214, patch from George Lund)
+ * fix handling of messages containing '\\n' (#198)
+ * handle irregular multi-line msgstr (no "" as first line) gracefully (#171)
+ * parse_decimal() now returns Decimals not floats, API change (#178)
+ * no warnings when running setup.py without installed setuptools (#262)
+ * modified Locale.__eq__ method so Locales are only equal if all of their
+   attributes (language, territory, script, variant) are equal
+ * resort to hard-coded message extractors/checkers if pkg_resources is 
+   installed but no egg-info was found (#230)
+ * format_time() and format_datetime() now accept also floats (#242)
+ * add babel.support.NullTranslations class similar to gettext.NullTranslations
+   but with all of Babel's new *gettext methods (#277)
+ * "init" and "update" commands support "--width" option (#284)
+ * fix 'input_dirs' option for setuptools integration (#232, initial patch by 
+   Étienne Bersac)
+ * ensure .mo file header contains the same information as the source .po file 
+   (#199)
+
 
 Version 0.9.6
 http://svn.edgewall.org/repos/babel/tags/0.9.6/

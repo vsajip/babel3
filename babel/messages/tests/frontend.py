@@ -28,13 +28,16 @@ from babel.compat import StringIO
 from babel.dates import format_datetime
 from babel.messages import frontend
 from babel.util import LOCALTZ
+from babel.messages.pofile import read_po
 
+
+this_dir = os.path.abspath(os.path.dirname(__file__))
 
 class CompileCatalogTestCase(unittest.TestCase):
 
     def setUp(self):
         self.olddir = os.getcwd()
-        self.datadir = os.path.join(os.path.dirname(__file__), 'data')
+        self.datadir = os.path.join(this_dir, 'data')
         os.chdir(self.datadir)
         _global_log.threshold = 5 # shut up distutils logging
 
@@ -64,7 +67,7 @@ class ExtractMessagesTestCase(unittest.TestCase):
 
     def setUp(self):
         self.olddir = os.getcwd()
-        self.datadir = os.path.join(os.path.dirname(__file__), 'data')
+        self.datadir = os.path.join(this_dir, 'data')
         os.chdir(self.datadir)
         _global_log.threshold = 5 # shut up distutils logging
 
@@ -105,6 +108,24 @@ class ExtractMessagesTestCase(unittest.TestCase):
         self.cmd.sort_output = True
         self.cmd.sort_by_file = True
         self.assertRaises(DistutilsOptionError, self.cmd.finalize_options)
+
+    def test_input_dirs_is_treated_as_list(self):
+        self.cmd.input_dirs = self.datadir
+        self.cmd.output_file = self._pot_file()
+        self.cmd.finalize_options()
+        self.cmd.run()
+        
+        catalog = read_po(open(self._pot_file(), 'U'))
+        msg = catalog.get('bar')
+        self.assertEqual(1, len(msg.locations))
+        self.assertTrue('file1.py' in msg.locations[0][0])
+
+    def test_input_dirs_handle_spaces_after_comma(self):
+        self.cmd.input_dirs = 'foo,  bar'
+        self.cmd.output_file = self._pot_file()
+        self.cmd.finalize_options()
+        
+        self.assertEqual(['foo', 'bar'], self.cmd.input_dirs)
 
     def test_extraction_with_default_mapping(self):
         self.cmd.copyright_holder = 'FooBar, Inc.'
@@ -274,7 +295,7 @@ class InitCatalogTestCase(unittest.TestCase):
 
     def setUp(self):
         self.olddir = os.getcwd()
-        self.datadir = os.path.join(os.path.dirname(__file__), 'data')
+        self.datadir = os.path.join(this_dir, 'data')
         os.chdir(self.datadir)
         _global_log.threshold = 5 # shut up distutils logging
 
@@ -507,12 +528,123 @@ msgstr[0] ""
        'date': format_datetime(datetime.now(LOCALTZ), 'yyyy-MM-dd HH:mmZ',
                                tzinfo=LOCALTZ, locale='ja_JP')},
        open(po_file, 'U').read())
+   
+    def test_supports_no_wrap(self):
+        self.cmd.input_file = 'project/i18n/long_messages.pot'
+        self.cmd.locale = 'en_US'
+        self.cmd.output_dir = 'project/i18n'
+        
+        long_message = '"'+ 'xxxxx '*15 + '"'
+        
+        pot_contents = open('project/i18n/messages.pot', 'U').read()
+        pot_with_very_long_line = pot_contents.replace('"bar"', long_message)
+        open(self.cmd.input_file, 'w').write(pot_with_very_long_line)
+        self.cmd.no_wrap = True
+
+        self.cmd.finalize_options()
+        self.cmd.run()
+
+        po_file = self._po_file('en_US')
+        assert os.path.isfile(po_file)
+        self.assertEqual(
+r"""# English (United States) translations for TestProject.
+# Copyright (C) 2007 FooBar, Inc.
+# This file is distributed under the same license as the TestProject
+# project.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2007.
+# 
+msgid ""
+msgstr ""
+"Project-Id-Version: TestProject 0.1\n"
+"Report-Msgid-Bugs-To: bugs.address@email.tld\n"
+"POT-Creation-Date: 2007-04-01 15:30+0200\n"
+"PO-Revision-Date: %(date)s\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: en_US <LL@li.org>\n"
+"Plural-Forms: nplurals=2; plural=(n != 1)\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel %(version)s\n"
+
+#. This will be a translator coment,
+#. that will include several lines
+#: project/file1.py:8
+msgid %(long_message)s
+msgstr ""
+
+#: project/file2.py:9
+msgid "foobar"
+msgid_plural "foobars"
+msgstr[0] ""
+msgstr[1] ""
+
+""" % {'version': VERSION,
+       'date': format_datetime(datetime.now(LOCALTZ), 'yyyy-MM-dd HH:mmZ',
+                               tzinfo=LOCALTZ, locale='en_US'),
+       'long_message': long_message},
+       open(po_file, 'U').read())
+   
+    def test_supports_width(self):
+        self.cmd.input_file = 'project/i18n/long_messages.pot'
+        self.cmd.locale = 'en_US'
+        self.cmd.output_dir = 'project/i18n'
+        
+        long_message = '"'+ 'xxxxx '*15 + '"'
+        
+        pot_contents = open('project/i18n/messages.pot', 'U').read()
+        pot_with_very_long_line = pot_contents.replace('"bar"', long_message)
+        open(self.cmd.input_file, 'w').write(pot_with_very_long_line)
+        self.cmd.width = 120
+        self.cmd.finalize_options()
+        self.cmd.run()
+
+        po_file = self._po_file('en_US')
+        assert os.path.isfile(po_file)
+        self.assertEqual(
+r"""# English (United States) translations for TestProject.
+# Copyright (C) 2007 FooBar, Inc.
+# This file is distributed under the same license as the TestProject
+# project.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2007.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: TestProject 0.1\n"
+"Report-Msgid-Bugs-To: bugs.address@email.tld\n"
+"POT-Creation-Date: 2007-04-01 15:30+0200\n"
+"PO-Revision-Date: %(date)s\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: en_US <LL@li.org>\n"
+"Plural-Forms: nplurals=2; plural=(n != 1)\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel %(version)s\n"
+
+#. This will be a translator coment,
+#. that will include several lines
+#: project/file1.py:8
+msgid %(long_message)s
+msgstr ""
+
+#: project/file2.py:9
+msgid "foobar"
+msgid_plural "foobars"
+msgstr[0] ""
+msgstr[1] ""
+
+""" % {'version': VERSION,
+       'date': format_datetime(datetime.now(LOCALTZ), 'yyyy-MM-dd HH:mmZ',
+                               tzinfo=LOCALTZ, locale='en_US'),
+       'long_message': long_message},
+       open(po_file, 'U').read())
 
 
 class CommandLineInterfaceTestCase(unittest.TestCase):
 
     def setUp(self):
-        self.datadir = os.path.join(os.path.dirname(__file__), 'data')
+        self.datadir = os.path.join(this_dir, 'data')
         self.orig_working_dir = os.getcwd()
         self.orig_argv = sys.argv
         self.orig_stdout = sys.stdout
@@ -549,8 +681,7 @@ class CommandLineInterfaceTestCase(unittest.TestCase):
         try:
             self.cli.run(sys.argv)
             self.fail('Expected SystemExit')
-        except SystemExit:
-            e = sys.exc_info()[1]
+        except SystemExit as e:
             self.assertEqual(2, e.code)
             self.assertEqual("""\
 usage: pybabel command [options] [args]
@@ -589,8 +720,7 @@ pybabel: error: no valid command or option passed. try the -h/--help option for 
         try:
             self.cli.run(sys.argv + ['--help'])
             self.fail('Expected SystemExit')
-        except SystemExit:
-            e = sys.exc_info()[1]
+        except SystemExit as e:
             self.assertEqual(0, e.code)
             self.assertEqual("""\
 usage: pybabel command [options] [args]

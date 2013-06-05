@@ -263,15 +263,18 @@ def extract(method, fileobj, keywords=DEFAULT_KEYWORDS, comment_tags=(),
         try:
             from pkg_resources import working_set
         except ImportError:
-            # pkg_resources is not available, so we resort to looking up the
-            # builtin extractors directly
-            builtin = {'ignore': extract_nothing, 'python': extract_python}
-            func = builtin.get(method)
+            pass
         else:
             for entry_point in working_set.iter_entry_points(GROUP_NAME,
                                                              method):
                 func = entry_point.load(require=True)
                 break
+        if func is None:
+            # if pkg_resources is not available or no usable egg-info was found
+            # (see #230), we resort to looking up the builtin extractors 
+            # directly
+            builtin = {'ignore': extract_nothing, 'python': extract_python}
+            func = builtin.get(method)
     if func is None:
         raise ValueError('Unknown extraction method %r' % method)
 
@@ -589,3 +592,4 @@ def extract_javascript(fileobj, keywords, comment_tags, options):
             funcname = token.value
 
         last_token = token
+

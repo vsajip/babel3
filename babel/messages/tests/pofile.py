@@ -18,6 +18,7 @@ import doctest
 import unittest
 
 from babel.compat import StringIO, BytesIO
+from babel.core import Locale
 from babel.messages.catalog import Catalog, Message
 from babel.messages import pofile
 from babel.util import FixedOffsetTimezone
@@ -29,7 +30,7 @@ class ReadPoTestCase(unittest.TestCase):
         buf = StringIO(r'''msgid "foo"
 msgstr "Voh"''')
         catalog = pofile.read_po(buf, locale='en_US')
-        self.assertEqual('en_US', catalog.locale)
+        self.assertEqual(Locale('en', 'US'), catalog.locale)
 
     def test_preserve_domain(self):
         buf = StringIO(r'''msgid "foo"
@@ -528,11 +529,36 @@ msgstr ""''')
         self.assertEqual(catalog['missing line number'].locations, [])
         self.assertEqual(catalog['broken line number'].locations, [])
 
+
+class PofileFunctionsTestCase(unittest.TestCase):
+
+    def test_unescape(self):
+        escaped = '"Say:\\n  \\"hello, world!\\"\\n"'
+        unescaped = 'Say:\n  "hello, world!"\n'
+        self.assertNotEqual(unescaped, escaped)
+        self.assertEqual(unescaped, pofile.unescape(escaped))
+
+    def test_unescape_of_quoted_newline(self):
+        # regression test for #198
+        self.assertEqual(r'\n', pofile.unescape(r'"\\n"'))
+    
+    def test_denormalize_on_msgstr_without_empty_first_line(self):
+        # handle irregular multi-line msgstr (no "" as first line) 
+        # gracefully (#171)
+        msgstr = '"multi-line\\n"\n" translation"'
+        expected_denormalized = 'multi-line\n translation'
+        
+        self.assertEqual(expected_denormalized, pofile.denormalize(msgstr))
+        self.assertEqual(expected_denormalized, 
+                         pofile.denormalize('""\n' + msgstr))
+
+
 def suite():
     suite = unittest.TestSuite()
     suite.addTest(doctest.DocTestSuite(pofile, optionflags=doctest.ELLIPSIS))
     suite.addTest(unittest.makeSuite(ReadPoTestCase))
     suite.addTest(unittest.makeSuite(WritePoTestCase))
+    suite.addTest(unittest.makeSuite(PofileFunctionsTestCase))
     return suite
 
 if __name__ == '__main__':

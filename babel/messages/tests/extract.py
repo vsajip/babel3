@@ -101,7 +101,7 @@ add_notice(req, ngettext("Bar deleted.",
                                            None),
                           ['NOTE: This Comment SHOULD Be Extracted',
                            'NOTE: And This One Too']),
-                          messages[3])
+                         messages[3])
 
     def test_declarations(self):
         buf = StringIO("""\

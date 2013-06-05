@@ -25,7 +25,7 @@ following environment variables, in that order:
 # TODO:
 #  Padding and rounding increments in pattern:
 #  - http://www.unicode.org/reports/tr35/ (Appendix G.6)
-from decimal import Decimal
+from decimal import Decimal, InvalidOperation
 import math
 import re
 
@@ -264,8 +264,13 @@ def parse_number(string, locale=LC_NUMERIC):
     >>> parse_number('1.099', locale='de_DE') == long_type(1099)
     True
 
-    When the given string cannot be parsed, a NumberFormatError is raised.
-
+    When the given string cannot be parsed, an exception is raised:
+    
+    >>> parse_number('1.099,98', locale='de')
+    Traceback (most recent call last):
+        ...
+    NumberFormatError: '1.099,98' is not a valid number
+    
     :param string: the string to parse
     :param locale: the `Locale` object or locale identifier
     :return: the parsed number
@@ -273,33 +278,38 @@ def parse_number(string, locale=LC_NUMERIC):
     :raise `NumberFormatError`: if the string can not be converted to a number
     """
     try:
-        return long_type(string.replace(get_group_symbol(locale), ''))
+        return int(string.replace(get_group_symbol(locale), ''))
     except ValueError:
-        raise NumberFormatError('%r is not a valid number' % string)
+        raise NumberFormatError("'%s' is not a valid number" % string)
 
 def parse_decimal(string, locale=LC_NUMERIC):
-    """Parse localized decimal string into a float.
+    """Parse localized decimal string into a decimal.
     
     >>> parse_decimal('1,099.98', locale='en_US')
-    1099.98
+    Decimal('1099.98')
     >>> parse_decimal('1.099,98', locale='de')
-    1099.98
+    Decimal('1099.98')
     
-    When the given string cannot be parsed, a NumberFormatError is raised.
+    When the given string cannot be parsed, an exception is raised:
+    
+    >>> parse_decimal('2,109,998', locale='de')
+    Traceback (most recent call last):
+        ...
+    NumberFormatError: '2,109,998' is not a valid decimal number
     
     :param string: the string to parse
     :param locale: the `Locale` object or locale identifier
     :return: the parsed decimal number
-    :rtype: `float`
+    :rtype: `Decimal`
     :raise `NumberFormatError`: if the string can not be converted to a
                                 decimal number
     """
     locale = Locale.parse(locale)
     try:
-        return float(string.replace(get_group_symbol(locale), '')
+        return Decimal(string.replace(get_group_symbol(locale), '')
                            .replace(get_decimal_symbol(locale), '.'))
-    except ValueError:
-        raise NumberFormatError('%r is not a valid decimal number' % string)
+    except InvalidOperation:
+        raise NumberFormatError("'%s' is not a valid decimal number" % string)
 
 
 PREFIX_END = r'[^0-9@#.,]'
@@ -315,9 +325,42 @@ number_re = re.compile(r"%s%s%s" % (PREFIX_PATTERN, NUMBER_PATTERN,
 def split_number(value):
     """Convert a number into a (intasstring, fractionasstring) tuple"""
     if isinstance(value, Decimal):
-        text = str(value)
-    else:
-        text = ('%.9f' % value).rstrip('0')
+        # NB can't just do text = str(value) as str repr of Decimal may be
+        # in scientific notation, e.g. for small numbers.
+        
+        sign, digits, exp = value.as_tuple()
+        # build list of digits in reverse order, then reverse+join
+        # as per http://docs.python.org/library/decimal.html#recipes
+        int_part = []
+        frac_part = []
+        
+        digits = list(map(str, digits))
+        
+        # get figures after decimal point
+        for i in range(-exp):
+            # add digit if available, else 0
+            if digits:
+                frac_part.append(digits.pop())
+            else:
+                frac_part.append('0')
+        
+        # add in some zeroes...
+        for i in range(exp):
+            int_part.append('0')
+        
+        # and the rest
+        while digits:
+            int_part.append(digits.pop())
+        
+        # if < 1, int_part must be set to '0'
+        if len(int_part) == 0:
+            int_part = '0',
+        
+        if sign:
+            int_part.append('-')
+        
+        return ''.join(reversed(int_part)), ''.join(reversed(frac_part))
+    text = ('%.9f' % value).rstrip('0')
     if '.' in text:
         a, b = text.split('.', 1)
         if b == '0':
@@ -471,6 +514,8 @@ class NumberPattern(object):
         return '<%s %s>' % (type(self).__name__, pattern)
 
     def apply(self, value, locale, currency=None):
+        if isinstance(value, float):
+            value = Decimal(str(value))
         value *= self.scale
         is_negative = int(value < 0)
         if self.exp_prec: # Scientific notation
@@ -579,3 +624,4 @@ class NumberPattern(object):
         while len(value) > min and value[-1] == '0':
             value = value[:-1]
         return get_decimal_symbol(locale) + value
+

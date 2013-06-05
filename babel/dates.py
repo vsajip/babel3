@@ -203,7 +203,7 @@ def get_timezone_gmt(datetime=None, width='long', locale=LC_TIME):
     """
     if datetime is None:
         datetime = datetime_.utcnow()
-    elif isinstance(datetime, integer_types):
+    elif isinstance(datetime, int):
         datetime = datetime_.utcfromtimestamp(datetime).time()
     if datetime.tzinfo is None:
         datetime = datetime.replace(tzinfo=UTC)
@@ -247,7 +247,7 @@ def get_timezone_location(dt_or_tzinfo=None, locale=LC_TIME):
     :rtype: `unicode`
     :since: version 0.9
     """
-    if dt_or_tzinfo is None or isinstance(dt_or_tzinfo, integer_types):
+    if dt_or_tzinfo is None or isinstance(dt_or_tzinfo, int):
         dt = None
         tzinfo = UTC
     elif isinstance(dt_or_tzinfo, (datetime, time)):
@@ -366,7 +366,7 @@ def get_timezone_name(dt_or_tzinfo=None, width='long', uncommon=False,
     :see:  `LDML Appendix J: Time Zone Display Names
             <http://www.unicode.org/reports/tr35/#Time_Zone_Fallback>`_
     """
-    if dt_or_tzinfo is None or isinstance(dt_or_tzinfo, integer_types):
+    if dt_or_tzinfo is None or isinstance(dt_or_tzinfo, int):
         dt = None
         tzinfo = UTC
     elif isinstance(dt_or_tzinfo, (datetime, time)):
@@ -425,7 +425,7 @@ def get_timezone_name(dt_or_tzinfo=None, width='long', uncommon=False,
 def format_date(date=None, format='medium', locale=LC_TIME):
     """Return a date formatted according to the given pattern.
     
-    >>> d = date(2007, 4, 1)
+    >>> d = date(2007, 0o4, 0o1)
     >>> format_date(d, locale='en_US') == 'Apr 1, 2007'
     True
     >>> format_date(d, format='full', locale='de_DE') == 'Sonntag, 1. April 2007'
@@ -464,7 +464,7 @@ def format_datetime(datetime=None, format='medium', tzinfo=None,
                     locale=LC_TIME):
     r"""Return a date formatted according to the given pattern.
     
-    >>> dt = datetime(2007, 4, 1, 15, 30)
+    >>> dt = datetime(2007, 0o4, 0o1, 15, 30)
     >>> format_datetime(dt, locale='en_US') == 'Apr 1, 2007 3:30:00 PM'
     True
     
@@ -489,7 +489,7 @@ def format_datetime(datetime=None, format='medium', tzinfo=None,
     """
     if datetime is None:
         datetime = datetime_.utcnow()
-    elif isinstance(datetime, integer_types):
+    elif isinstance(datetime, (int, float)):
         datetime = datetime_.utcfromtimestamp(datetime)
     elif isinstance(datetime, time):
         datetime = datetime_.combine(date.today(), datetime)
@@ -573,7 +573,7 @@ def format_time(time=None, format='medium', tzinfo=None, locale=LC_TIME):
     """
     if time is None:
         time = datetime.utcnow()
-    elif isinstance(time, integer_types):
+    elif isinstance(time, (int, float)):
         time = datetime.utcfromtimestamp(time)
     if time.tzinfo is None:
         time = time.replace(tzinfo=UTC)
@@ -923,7 +923,7 @@ class DateTimeFormat(object):
     def get_day_of_year(self, date=None):
         if date is None:
             date = self.value
-        return (date - date_(date.year, 1, 1)).days + 1
+        return (date - date.replace(month=1, day=1)).days + 1
 
     def get_week_number(self, day_of_period, day_of_week=None):
         """Return the number of the week of a day within a period. This may be
@@ -1052,3 +1052,4 @@ def parse_pattern(pattern):
         append_chars()
 
     return DateTimePattern(pattern, ''.join(result).replace('\0', "'"))
+
