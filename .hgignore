@@ -1,0 +1,12 @@
+syntax: glob
+*~
+*.pyc
+*.pyo
+*.idea
+.tox
+build/*
+dist/*
+*.egg
+*.egg-info
+babel/localedata/*
+babel/global.dat
