@@ -266,10 +266,12 @@ def parse_number(string, locale=LC_NUMERIC):
 
     When the given string cannot be parsed, an exception is raised:
     
-    >>> parse_number('1.099,98', locale='de')
-    Traceback (most recent call last):
-        ...
-    NumberFormatError: '1.099,98' is not a valid number
+    >>> try:
+    ...     parse_number('1.099,98', locale='de')
+    ... except NumberFormatError as e:
+    ...     msg = str(e)
+    >>> msg
+    "'1.099,98' is not a valid number"
     
     :param string: the string to parse
     :param locale: the `Locale` object or locale identifier
@@ -292,11 +294,13 @@ def parse_decimal(string, locale=LC_NUMERIC):
     
     When the given string cannot be parsed, an exception is raised:
     
-    >>> parse_decimal('2,109,998', locale='de')
-    Traceback (most recent call last):
-        ...
-    NumberFormatError: '2,109,998' is not a valid decimal number
-    
+    >>> try:
+    ...     parse_decimal('2,109,998', locale='de')
+    ... except NumberFormatError as e:
+    ...     msg = str(e)
+    >>> msg
+    "'2,109,998' is not a valid decimal number"
+
     :param string: the string to parse
     :param locale: the `Locale` object or locale identifier
     :return: the parsed decimal number

@@ -107,21 +107,24 @@ def read_po(fileobj, locale=None, domain=None, ignore_obsolete=False):
     ... msgstr[1] "baaz"
     ... ''')
     >>> catalog = read_po(buf)
-    >>> catalog.revision_date = datetime(2007, 0o4, 0o1)
+    >>> catalog.revision_date = datetime(2007, 4, 1)
 
+    >>> actual = []
     >>> for message in catalog:
     ...     if message.id:
-    ...         print("'%s' '%s'" % (message.id, message.string))
-    ...         print('%s %s' % message.locations[0])
-    ...         print('%s' % ' '.join(message.flags))
-    ...         print("'%s' '%s'" % (message.user_comments, message.auto_comments))
-    'foo %(name)s' 'quux %(name)s'
-    main.py 1
-    fuzzy python-format
-    '[]' '[]'
-    (('bar', 'baz'), ('bar', 'baaz'))
-      ([('main.py', 3)], set([]))
-      (['A user comment'], ['An auto comment'])
+    ...         actual.append((message.id, message.string))
+    ...         actual.append((message.locations, message.flags))
+    ...         actual.append((message.user_comments, message.auto_comments))
+    >>> expected = [
+    ...   ('foo %(name)s', 'quux %(name)s'),
+    ...   ([('main.py', 1)], set(['fuzzy', 'python-format'])),
+    ...   ([], []),
+    ...   (('bar', 'baz'), ('bar', 'baaz')),
+    ...   ([('main.py', 3)], set([])),
+    ...   (['A user comment'], ['An auto comment'])
+    ... ]
+    >>> actual == expected
+    True
 
     :param fileobj: the file-like object to read the PO file from
     :param locale: the locale identifier or `Locale` object, or `None`

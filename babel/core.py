@@ -104,10 +104,12 @@ class Locale(object):
     If a locale is requested for which no locale data is available, an
     `UnknownLocaleError` is raised:
     
-    >>> Locale.parse('en_DE')
-    Traceback (most recent call last):
-        ...
-    UnknownLocaleError: unknown locale 'en_DE'
+    >>> try:
+    ...     Locale.parse('en_DE')
+    ... except UnknownLocaleError as e:
+    ...     msg = str(e)
+    >>> msg
+    "unknown locale 'en_DE'"
     
     :see: `IETF RFC 3066 <http://www.ietf.org/rfc/rfc3066.txt>`_
     """
