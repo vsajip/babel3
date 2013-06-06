@@ -10,3 +10,5 @@ dist/*
 *.egg-info
 babel/localedata/*
 babel/global.dat
+babel/messages/tests/data/project/i18n/*
+
