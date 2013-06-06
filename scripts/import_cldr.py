@@ -214,9 +214,10 @@ def main():
                 week_data['min_days'] = int(elem.attrib['count'])
 
         for elem in supelem.findall('firstDay'):
-            territories = elem.attrib['territories'].split()
-            if territory in territories or any([r in territories for r in regions]):
-                week_data['first_day'] = weekdays[elem.attrib['day']]
+            if 'alt' not in elem.attrib:    # ignore alternatives
+                territories = elem.attrib['territories'].split()
+                if territory in territories or any([r in territories for r in regions]):
+                    week_data['first_day'] = weekdays[elem.attrib['day']]
 
         for elem in supelem.findall('weekendStart'):
             territories = elem.attrib['territories'].split()
