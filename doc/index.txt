@@ -27,4 +27,5 @@ web-based applications.
  * `Command-Line Interface <cmdline.html>`_
  * `Distutils/Setuptools Integration <setup.html>`_
  * `Support Classes and Functions <support.html>`_
+ * `Notes for Developers <developer.html>`_
  * `Generated API Documentation <api/index.html>`_

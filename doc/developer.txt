@@ -1,0 +1,82 @@
+.. -*- mode: rst; encoding: utf-8 -*-
+
+====================
+Notes for developers
+====================
+
+Here are some short notes for developers of Babel3 (not: developers just
+using it within their project).
+
+.. contents:: Contents
+   :depth: 2
+.. sectnum::
+
+
+Running code or tests from a repository checkout
+================================================
+
+The data extracted from the `Common Locale Data Repository (CLDR)
+<http://unicode.org/cldr/>`_ is not committed to the repository, so you
+have to import it before working on / using Babel::
+
+    wget http://unicode.org/Public/cldr/1.7.2/core.zip
+    unzip core.zip  # creates a "common" directory with the data
+    mkdir babel/localedata
+    python scripts/import_cldr.py common
+
+Note: you may have to repeat this if the import_cldr.py script changes.
+
+
+Running the tests
+=================
+
+Testing all supported python versions (needs the `tox` tool)::
+
+    tox
+
+Just testing with one python version::
+
+    python setup.py test
+
+
+There are also doctests, you can run them using::
+
+    python setup.py test_doc
+
+
+Building the docs
+=================
+
+Note: this currently only works when using Python 2.x:
+
+Install docutils, genshi, epydoc and pygments, then run::
+
+    python setup.py build_doc
+
+
+Development Workflow
+====================
+
+We use the usual bitbucket / DVCS workflow, the main repo and the issue
+tracker for Babel3 is at:
+
+https://bitbucket.org/babel3_developers/babel3
+
+If you like to contribute, fork the repo (so you have your own public repo
+under your bitbucket user account). Then clone that repo to your development
+machine.
+
+Check whether there are multiple branches in the repo and make sure you work
+on an appropriate one. change/extend/fix stuff, run the tests (make sure
+there are not more failing tests than before your changes), commit to your
+local repo.
+
+Push changesets to your bitbucket repo, go to that repo's web interface
+and create a pull request there to notify us.
+
+Try to create clean changesets, focus on one thing per commit, write clean
+code, obey PEP8, write meaningful commit comments.
+
+If you are unsure about changes / if your changes are complex, do a codereview
+before committing - you can use http://codereview.appspot.com/ for that.
+
