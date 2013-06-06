@@ -54,8 +54,7 @@ else:
     string_types = str,
     integer_types = int,
 
-    def unichr(s):
-        return u(chr(s))
+    unichr = chr
 
     import pickle
     from collections import UserDict as DictMixin
