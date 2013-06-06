@@ -77,13 +77,6 @@ else:
 long_type = integer_types[-1]
 
 try:
-    any = any
-except NameError:
-    def any(iterable):
-        return [_f for _f in list(iterable) if _f]
-
-try:
     import threading
 except ImportError:
     import dummy_threading as threading
-
