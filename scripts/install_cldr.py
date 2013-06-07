@@ -23,10 +23,12 @@ def main():
     td = tempfile.mkdtemp()
     try:
         os.system('python setup.py egg_info')
+        print('Downloading CLDR from %s' % URL)
         data = urlopen(URL).read()
         zf = zipfile.ZipFile(BytesIO(data))
         try:
             zf.extractall(td)
+            print('Extracted %d files to %d' % len(zf.infolist()), td)
         finally:
             zf.close()
         workdir = os.path.join(td, 'common')
