@@ -21,6 +21,7 @@ URL = 'http://unicode.org/Public/cldr/1.7.2/core.zip'
 
 def main():
     td = tempfile.mkdtemp()
+    rc = 0
     try:
         os.system('python setup.py egg_info')
         print('Downloading CLDR from %s' % URL)
@@ -36,9 +37,12 @@ def main():
         if not os.path.exists(ldpath):
             print('Creating %s' % ldpath)
             os.makedirs(ldpath)
-        os.system('python scripts/import_cldr.py %s' % workdir)
+        cmd = 'python scripts/import_cldr.py %s' % workdir
+        print('Running %r' % cmd)
+        rc = os.system(cmd)
     finally:
         shutil.rmtree(td)
+    return rc
 
 if __name__ == '__main__':
     try:
