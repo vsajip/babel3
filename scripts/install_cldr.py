@@ -28,10 +28,14 @@ def main():
         zf = zipfile.ZipFile(BytesIO(data))
         try:
             zf.extractall(td)
-            print('Extracted %d files to %d' % len(zf.infolist()), td)
+            print('Extracted %d files to %s' % (len(zf.infolist()), td))
         finally:
             zf.close()
         workdir = os.path.join(td, 'common')
+        ldpath = os.path.join('babel', 'localedata')
+        if not os.path.exists(ldpath):
+            print('Creating %s' % ldpath)
+            os.makedirs(ldpath)
         os.system('python scripts/import_cldr.py %s' % workdir)
     finally:
         shutil.rmtree(td)
