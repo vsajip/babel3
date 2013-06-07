@@ -4,7 +4,7 @@ Installing Babel
 Prerequisites
 -------------
 
- * Python 2.4 or later
+ * Python 2.6/2.7 or 3.2/3.3
  * CLDR 1.7
  * Optional: setuptools 0.6b1 or later
  * Optional: pytz (strongly recommended for real time-zone support, mandatory 
