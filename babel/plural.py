@@ -54,7 +54,7 @@ class PluralRule(object):
         :raise RuleError: if the expression is malformed
         """
         if isinstance(rules, dict):
-            rules = list(rules.items())
+            rules = sorted(rules.items())
         found = set()
         self.abstract = []
         for key, expr in rules:
@@ -172,7 +172,7 @@ def to_gettext(rule):
     technically limited to integers and returns indices rather than tags.
 
     >>> to_gettext({'one': 'n is 1', 'two': 'n is 2'})
-    'nplurals=3; plural=((n == 2) ? 1 : (n == 1) ? 0 : 2)'
+    'nplurals=3; plural=((n == 1) ? 0 : (n == 2) ? 1 : 2)'
 
     :param rule: the rules as list or dict, or a `PluralRule` object
     :return: an equivalent gettext-style plural expression
