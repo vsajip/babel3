@@ -40,6 +40,9 @@ def main():
         cmd = 'python scripts/import_cldr.py %s' % workdir
         print('Running %r' % cmd)
         rc = os.system(cmd)
+        if rc:
+            print('import_cldr failed with error code %d' % rc)
+            rc = 1
     finally:
         shutil.rmtree(td)
     return rc
