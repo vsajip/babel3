@@ -6,4 +6,4 @@ python:
     - "3.3"
     - "pypy"
 before_script: "python scripts/install_cldr.py"
-script: "PYTHONHASHSEED=0 python setup.py test"
+script: "python setup.py test"
