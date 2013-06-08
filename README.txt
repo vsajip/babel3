@@ -10,11 +10,9 @@ applications (in particular web-based applications).
 
 Details can be found in the HTML files in the `doc` folder.
 
-For more information please visit the Babel web site:
+For more information please visit the `Babel web site
+<http://babel.edgewall.org/>`_.
 
-  <http://babel.edgewall.org/>
-
-Continuous integration testing for this fork has been set up, see results at
-
-  <https://travis-ci.org/vsajip/babel3/>
+Continuous integration testing for this fork has been set up, see the
+results `here <https://travis-ci.org/vsajip/babel3/>`_.
 
