@@ -23,7 +23,7 @@ from babel.messages import Catalog
 from babel.messages.mofile import write_mo
 
 class TranslationsTestCase(unittest.TestCase):
-    
+
     def setUp(self):
         # Use a locale which won't fail to run the tests
         os.environ['LANG'] = 'en_US.UTF-8'
@@ -42,7 +42,7 @@ class TranslationsTestCase(unittest.TestCase):
         catalog1 = Catalog(locale='en_GB', domain='messages')
         catalog2 = Catalog(locale='en_GB', domain='messages1')
         for ids, kwargs in messages1:
-            catalog1.add(ids, **kwargs)            
+            catalog1.add(ids, **kwargs)
         for ids, kwargs in messages2:
             catalog2.add(ids, **kwargs)
         catalog1_fp = BytesIO()
@@ -175,7 +175,7 @@ class LazyProxyTestCase(unittest.TestCase):
         proxy = support.LazyProxy(add_one)
         self.assertEqual(1, proxy.value)
         self.assertEqual(1, proxy.value)
-    
+
     def test_can_disable_proxy_cache(self):
         self.counter = 0
         def add_one():

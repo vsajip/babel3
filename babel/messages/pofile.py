@@ -489,4 +489,3 @@ def write_po(fileobj, catalog, width=76, no_location=False, omit_header=False,
                 _write_comment(comment)
             _write_message(message, prefix='#~ ')
             _write('\n')
-

@@ -28,15 +28,15 @@ _global_data = None
 
 def get_global(key):
     """Return the dictionary for the given key in the global data.
-    
+
     The global data is stored in the ``babel/global.dat`` file and contains
     information independent of individual locales.
-    
+
     >>> get_global('zone_aliases')['UTC'] == 'Etc/GMT'
     True
     >>> get_global('zone_territories')['Europe/Berlin'] == 'DE'
     True
-    
+
     :param key: the data key
     :return: the dictionary found in the global data under the given key
     :rtype: `dict`
@@ -55,13 +55,13 @@ def get_global(key):
 
 
 LOCALE_ALIASES = {
-    'ar': 'ar_SY', 'bg': 'bg_BG', 'bs': 'bs_BA', 'ca': 'ca_ES', 'cs': 'cs_CZ', 
-    'da': 'da_DK', 'de': 'de_DE', 'el': 'el_GR', 'en': 'en_US', 'es': 'es_ES', 
-    'et': 'et_EE', 'fa': 'fa_IR', 'fi': 'fi_FI', 'fr': 'fr_FR', 'gl': 'gl_ES', 
-    'he': 'he_IL', 'hu': 'hu_HU', 'id': 'id_ID', 'is': 'is_IS', 'it': 'it_IT', 
-    'ja': 'ja_JP', 'km': 'km_KH', 'ko': 'ko_KR', 'lt': 'lt_LT', 'lv': 'lv_LV', 
-    'mk': 'mk_MK', 'nl': 'nl_NL', 'nn': 'nn_NO', 'no': 'nb_NO', 'pl': 'pl_PL', 
-    'pt': 'pt_PT', 'ro': 'ro_RO', 'ru': 'ru_RU', 'sk': 'sk_SK', 'sl': 'sl_SI', 
+    'ar': 'ar_SY', 'bg': 'bg_BG', 'bs': 'bs_BA', 'ca': 'ca_ES', 'cs': 'cs_CZ',
+    'da': 'da_DK', 'de': 'de_DE', 'el': 'el_GR', 'en': 'en_US', 'es': 'es_ES',
+    'et': 'et_EE', 'fa': 'fa_IR', 'fi': 'fi_FI', 'fr': 'fr_FR', 'gl': 'gl_ES',
+    'he': 'he_IL', 'hu': 'hu_HU', 'id': 'id_ID', 'is': 'is_IS', 'it': 'it_IT',
+    'ja': 'ja_JP', 'km': 'km_KH', 'ko': 'ko_KR', 'lt': 'lt_LT', 'lv': 'lv_LV',
+    'mk': 'mk_MK', 'nl': 'nl_NL', 'nn': 'nn_NO', 'no': 'nb_NO', 'pl': 'pl_PL',
+    'pt': 'pt_PT', 'ro': 'ro_RO', 'ru': 'ru_RU', 'sk': 'sk_SK', 'sl': 'sl_SI',
     'sv': 'sv_SE', 'th': 'th_TH', 'tr': 'tr_TR', 'uk': 'uk_UA'
 }
 
@@ -73,7 +73,7 @@ class UnknownLocaleError(Exception):
 
     def __init__(self, identifier):
         """Create the exception.
-        
+
         :param identifier: the identifier string of the unsupported locale
         """
         Exception.__init__(self, 'unknown locale %r' % identifier)
@@ -82,47 +82,47 @@ class UnknownLocaleError(Exception):
 
 class Locale(object):
     """Representation of a specific locale.
-    
+
     >>> locale = Locale('en', 'US')
     >>> repr(locale)
     "Locale('en', territory='US')"
     >>> locale.display_name == 'English (United States)'
     True
-    
+
     A `Locale` object can also be instantiated from a raw locale string:
-    
+
     >>> locale = Locale.parse('en-US', sep='-')
     >>> repr(locale) == "Locale('en', territory='US')"
     True
-    
+
     `Locale` objects provide access to a collection of locale data, such as
     territory and language names, number and date format patterns, and more:
-    
+
     >>> locale.number_symbols['decimal'] == '.'
     True
-    
+
     If a locale is requested for which no locale data is available, an
     `UnknownLocaleError` is raised:
-    
+
     >>> try:
     ...     Locale.parse('en_DE')
     ... except UnknownLocaleError as e:
     ...     msg = str(e)
     >>> msg
     "unknown locale 'en_DE'"
-    
+
     :see: `IETF RFC 3066 <http://www.ietf.org/rfc/rfc3066.txt>`_
     """
 
     def __init__(self, language, territory=None, script=None, variant=None):
         """Initialize the locale object from the given identifier components.
-        
+
         >>> locale = Locale('en', 'US')
         >>> locale.language == 'en'
         True
         >>> locale.territory == 'US'
         True
-        
+
         :param language: the language code
         :param territory: the territory (country or region) code
         :param script: the script code
@@ -143,8 +143,8 @@ class Locale(object):
     @classmethod
     def default(cls, category=None, aliases=LOCALE_ALIASES):
         """Return the system default locale for the specified category.
-        
-        >>> for name in ['LANGUAGE', 'LC_ALL', 'LC_CTYPE']:
+
+        >>> for name in ['LANGUAGE', 'LC_ALL', 'LC_CTYPE', 'LC_MESSAGES']:
         ...     os.environ[name] = ''
         >>> os.environ['LANG'] = 'fr_FR.UTF-8'
         >>> Locale.default('LC_MESSAGES')
@@ -163,20 +163,20 @@ class Locale(object):
     @classmethod
     def negotiate(cls, preferred, available, sep='_', aliases=LOCALE_ALIASES):
         """Find the best match between available and requested locale strings.
-        
+
         >>> Locale.negotiate(['de_DE', 'en_US'], ['de_DE', 'de_AT'])
         Locale('de', territory='DE')
         >>> Locale.negotiate(['de_DE', 'en_US'], ['en', 'de'])
         Locale('de')
         >>> Locale.negotiate(['de_DE', 'de'], ['en_US'])
-        
+
         You can specify the character used in the locale identifiers to separate
         the differnet components. This separator is applied to both lists. Also,
         case is ignored in the comparison:
-        
+
         >>> Locale.negotiate(['de-DE', 'de'], ['en-us', 'de-de'], sep='-')
         Locale('de', territory='DE')
-        
+
         :param preferred: the list of locale identifers preferred by the user
         :param available: the list of locale identifiers available
         :param aliases: a dictionary of aliases for locale identifiers
@@ -193,17 +193,17 @@ class Locale(object):
     @classmethod
     def parse(cls, identifier, sep='_'):
         """Create a `Locale` instance for the given locale identifier.
-        
+
         >>> l = Locale.parse('de-DE', sep='-')
         >>> l.display_name == 'Deutsch (Deutschland)'
         True
-        
+
         If the `identifier` parameter is not a string, but actually a `Locale`
         object, that object is returned:
-        
+
         >>> Locale.parse(l)
         Locale('de', territory='DE')
-        
+
         :param identifier: the locale identifier string
         :param sep: optional component separator
         :return: a corresponding `Locale` instance
@@ -251,13 +251,13 @@ class Locale(object):
 
     def get_display_name(self, locale=None):
         """Return the display name of the locale using the given locale.
-        
+
         The display name will include the language, territory, script, and
         variant, if those are specified.
-        
+
         >>> Locale('zh', 'CN', script='Hans').get_display_name('en') == 'Chinese (Simplified Han, China)'
         True
-        
+
         :param locale: the locale to use
         :return: the display name
         """
@@ -280,80 +280,80 @@ class Locale(object):
 
     display_name = property(get_display_name, doc="""\
         The localized display name of the locale.
-        
+
         >>> Locale('en').display_name == 'English'
         True
         >>> Locale('en', 'US').display_name == 'English (United States)'
         True
         >>> Locale('sv').display_name == 'svenska'
         True
-        
+
         :type: `unicode`
         """)
 
-    @property    
+    @property
     def english_name(self):
         """The english display name of the locale.
-        
+
         >>> Locale('de').english_name == 'German'
         True
         >>> Locale('de', 'DE').english_name == 'German (Germany)'
         True
-        
+
         :type: `unicode`"""
         return self.get_display_name(Locale('en'))
 
     #{ General Locale Display Names
 
-    @property    
+    @property
     def languages(self):
         """Mapping of language codes to translated language names.
-        
+
         >>> Locale('de', 'DE').languages['ja'] == 'Japanisch'
         True
-        
+
         :type: `dict`
         :see: `ISO 639 <http://www.loc.gov/standards/iso639-2/>`_"""
         return self._data['languages']
 
-    @property    
+    @property
     def scripts(self):
         """Mapping of script codes to translated script names.
-        
+
         >>> Locale('en', 'US').scripts['Hira'] == 'Hiragana'
         True
-        
+
         :type: `dict`
         :see: `ISO 15924 <http://www.evertype.com/standards/iso15924/>`_"""
         return self._data['scripts']
 
-    @property    
+    @property
     def territories(self):
         """Mapping of script codes to translated script names.
-        
+
         >>> Locale('es', 'CO').territories['DE'] == 'Alemania'
         True
-        
+
         :type: `dict`
         :see: `ISO 3166 <http://www.iso.org/iso/en/prods-services/iso3166ma/>`_"""
         return self._data['territories']
 
-    @property    
+    @property
     def variants(self):
         """Mapping of script codes to translated script names.
-        
+
         >>> Locale('de', 'DE').variants['1901'] == 'Alte deutsche Rechtschreibung'
         True
-        
+
         :type: `dict`"""
         return self._data['variants']
 
     #{ Number Formatting
 
-    @property    
+    @property
     def currencies(self):
         """Mapping of currency codes to translated currency names.
-        
+
         >>> Locale('en').currencies['COP'] == 'Colombian Peso'
         True
         >>> Locale('de', 'DE').currencies['COP'] == 'Kolumbianischer Peso'
@@ -362,244 +362,244 @@ class Locale(object):
         :type: `dict`"""
         return self._data['currency_names']
 
-    @property    
+    @property
     def currency_symbols(self):
         """Mapping of currency codes to symbols.
-        
+
         >>> Locale('en', 'US').currency_symbols['USD'] == '$'
         True
         >>> Locale('es', 'CO').currency_symbols['USD'] == 'US$'
         True
-        
+
         :type: `dict`"""
         return self._data['currency_symbols']
 
-    @property    
+    @property
     def number_symbols(self):
         """Symbols used in number formatting.
-        
+
         >>> Locale('fr', 'FR').number_symbols['decimal'] == ','
         True
-        
+
         :type: `dict`"""
         return self._data['number_symbols']
 
-    @property    
+    @property
     def decimal_formats(self):
         """Locale patterns for decimal number formatting.
-        
+
         >>> Locale('en', 'US').decimal_formats[None]
         <NumberPattern #,##0.###>
-        
+
         :type: `dict`"""
         return self._data['decimal_formats']
 
-    @property    
+    @property
     def currency_formats(self):
         """Locale patterns for currency number formatting.
-        
+
         >>> str(Locale('en', 'US').currency_formats[None]) == '<NumberPattern \\\\xa4#,##0.00>'
         True
-        
+
         :type: `dict`"""
         return self._data['currency_formats']
 
-    @property    
+    @property
     def percent_formats(self):
         """Locale patterns for percent number formatting.
-        
+
         >>> Locale('en', 'US').percent_formats[None]
         <NumberPattern #,##0%>
-        
+
         :type: `dict`"""
         return self._data['percent_formats']
 
-    @property    
+    @property
     def scientific_formats(self):
         """Locale patterns for scientific number formatting.
-        
+
         >>> Locale('en', 'US').scientific_formats[None]
         <NumberPattern #E0>
-        
+
         :type: `dict`"""
         return self._data['scientific_formats']
 
     #{ Calendar Information and Date Formatting
 
-    @property    
+    @property
     def periods(self):
         """Locale display names for day periods (AM/PM).
-        
+
         >>> Locale('en', 'US').periods['am'] == 'AM'
         True
-        
+
         :type: `dict`"""
         return self._data['periods']
 
-    @property    
+    @property
     def days(self):
         """Locale display names for weekdays.
-        
+
         >>> Locale('de', 'DE').days['format']['wide'][3] == 'Donnerstag'
         True
-        
+
         :type: `dict`"""
         return self._data['days']
 
-    @property    
+    @property
     def months(self):
         """Locale display names for months.
-        
+
         >>> Locale('de', 'DE').months['format']['wide'][10] == ('Oktober')
         True
-        
+
         :type: `dict`"""
         return self._data['months']
 
-    @property    
+    @property
     def quarters(self):
         """Locale display names for quarters.
-        
+
         >>> Locale('de', 'DE').quarters['format']['wide'][1] == '1. Quartal'
         True
-        
+
         :type: `dict`"""
         return self._data['quarters']
 
-    @property    
+    @property
     def eras(self):
         """Locale display names for eras.
-        
+
         >>> Locale('en', 'US').eras['wide'][1] == 'Anno Domini'
         True
         >>> Locale('en', 'US').eras['abbreviated'][0] == 'BC'
         True
-        
+
         :type: `dict`"""
         return self._data['eras']
 
-    @property    
+    @property
     def time_zones(self):
         """Locale display names for time zones.
-        
+
         >>> Locale('en', 'US').time_zones['Europe/London']['long']['daylight'] == 'British Summer Time'
         True
         >>> Locale('en', 'US').time_zones['America/St_Johns']['city'] == "St. John's"
         True
-        
+
         :type: `dict`"""
         return self._data['time_zones']
 
-    @property    
+    @property
     def meta_zones(self):
         """Locale display names for meta time zones.
-        
+
         Meta time zones are basically groups of different Olson time zones that
         have the same GMT offset and daylight savings time.
-        
+
         >>> Locale('en', 'US').meta_zones['Europe_Central']['long']['daylight'] == 'Central European Summer Time'
         True
-        
+
         :type: `dict`
         :since: version 0.9"""
         return self._data['meta_zones']
 
-    @property    
+    @property
     def zone_formats(self):
         """Patterns related to the formatting of time zones.
-        
+
         >>> Locale('en', 'US').zone_formats['fallback'] == '%(1)s (%(0)s)'
         True
         >>> Locale('pt', 'BR').zone_formats['region'] == 'Hor\xe1rio %s'
         True
-        
+
         :type: `dict`
         :since: version 0.9"""
         return self._data['zone_formats']
 
-    @property    
+    @property
     def first_week_day(self):
         """The first day of a week, with 0 being Monday.
-        
+
         >>> Locale('de', 'DE').first_week_day
         0
         >>> Locale('en', 'US').first_week_day
         6
-        
+
         :type: `int`"""
         return self._data['week_data']['first_day']
 
-    @property    
+    @property
     def weekend_start(self):
         """The day the weekend starts, with 0 being Monday.
-        
+
         >>> Locale('de', 'DE').weekend_start
         5
-        
+
         :type: `int`"""
         return self._data['week_data']['weekend_start']
 
-    @property    
+    @property
     def weekend_end(self):
         """The day the weekend ends, with 0 being Monday.
-        
+
         >>> Locale('de', 'DE').weekend_end
         6
-        
+
         :type: `int`"""
         return self._data['week_data']['weekend_end']
 
-    @property    
+    @property
     def min_week_days(self):
-        """The minimum number of days in a week so that the week is counted as 
+        """The minimum number of days in a week so that the week is counted as
         the first week of a year or month.
-        
+
         >>> Locale('de', 'DE').min_week_days
         4
-        
+
         :type: `int`"""
         return self._data['week_data']['min_days']
 
-    @property    
+    @property
     def date_formats(self):
         """Locale patterns for date formatting.
-        
+
         >>> Locale('en', 'US').date_formats['short']
         <DateTimePattern M/d/yy>
         >>> Locale('fr', 'FR').date_formats['long']
         <DateTimePattern d MMMM y>
-        
+
         :type: `dict`"""
         return self._data['date_formats']
 
-    @property    
+    @property
     def time_formats(self):
         """Locale patterns for time formatting.
-        
+
         >>> Locale('en', 'US').time_formats['short']
         <DateTimePattern h:mm a>
         >>> Locale('fr', 'FR').time_formats['long']
         <DateTimePattern HH:mm:ss z>
-        
+
         :type: `dict`"""
         return self._data['time_formats']
 
-    @property    
+    @property
     def datetime_formats(self):
         """Locale patterns for datetime formatting.
-        
+
         >>> Locale('en').datetime_formats['full'] == '{1} {0}'
         True
         >>> Locale('th').datetime_formats['medium'] == '{1}, {0}'
         True
-        
+
         :type: `dict`"""
         return self._data['datetime_formats']
 
-    @property    
+    @property
     def plural_form(self):
         """Plural rules for the locale.
-        
+
         >>> Locale('en').plural_form(1) == 'one'
         True
         >>> Locale('en').plural_form(0) == 'other'
@@ -608,7 +608,7 @@ class Locale(object):
         True
         >>> Locale('ru').plural_form(100) == 'many'
         True
-        
+
         :type: `PluralRule`"""
         return self._data['plural_form']
 
@@ -616,7 +616,7 @@ class Locale(object):
 def default_locale(category=None, aliases=LOCALE_ALIASES):
     """Returns the system default locale for a given category, based on
     environment variables.
-    
+
     >>> for name in ['LANGUAGE', 'LC_ALL', 'LC_CTYPE']:
     ...     os.environ[name] = ''
     >>> os.environ['LANG'] = 'fr_FR.UTF-8'
@@ -655,21 +655,21 @@ def default_locale(category=None, aliases=LOCALE_ALIASES):
 
 def negotiate_locale(preferred, available, sep='_', aliases=LOCALE_ALIASES):
     """Find the best match between available and requested locale strings.
-    
+
     >>> negotiate_locale(['de_DE', 'en_US'], ['de_DE', 'de_AT']) == 'de_DE'
     True
     >>> negotiate_locale(['de_DE', 'en_US'], ['en', 'de']) == 'de'
     True
-    
+
     Case is ignored by the algorithm, the result uses the case of the preferred
     locale identifier:
-    
+
     >>> negotiate_locale(['de_DE', 'en_US'], ['de_de', 'de_at']) == 'de_DE'
     True
-    
+
     >>> negotiate_locale(['de_DE', 'en_US'], ['de_de', 'de_at']) == 'de_DE'
     True
-    
+
     By default, some web browsers unfortunately do not include the territory
     in the locale identifier for many locales, and some don't even allow the
     user to easily add the territory. So while you may prefer using qualified
@@ -677,22 +677,22 @@ def negotiate_locale(preferred, available, sep='_', aliases=LOCALE_ALIASES):
     the language-only locale sent by such browsers. To workaround that, this
     function uses a default mapping of commonly used langauge-only locale
     identifiers to identifiers including the territory:
-    
+
     >>> negotiate_locale(['ja', 'en_US'], ['ja_JP', 'en_US']) == 'ja_JP'
     True
-    
+
     Some browsers even use an incorrect or outdated language code, such as "no"
     for Norwegian, where the correct locale identifier would actually be "nb_NO"
     (Bokmål) or "nn_NO" (Nynorsk). The aliases are intended to take care of
     such cases, too:
-    
+
     >>> negotiate_locale(['no', 'sv'], ['nb_NO', 'sv_SE']) == 'nb_NO'
     True
-    
+
     You can override this default mapping by passing a different `aliases`
     dictionary to this function, or you can bypass the behavior althogher by
     setting the `aliases` parameter to `None`.
-    
+
     :param preferred: the list of locale strings preferred by the user
     :param available: the list of locale strings available
     :param sep: character that separates the different parts of the locale
@@ -720,37 +720,37 @@ def negotiate_locale(preferred, available, sep='_', aliases=LOCALE_ALIASES):
 
 def parse_locale(identifier, sep='_'):
     """Parse a locale identifier into a tuple of the form::
-    
+
       ``(language, territory, script, variant)``
-    
+
     >>> parse_locale('zh_CN') == ('zh', 'CN', None, None)
     True
     >>> parse_locale('zh_Hans_CN') == ('zh', 'CN', 'Hans', None)
     True
-    
+
     The default component separator is "_", but a different separator can be
     specified using the `sep` parameter:
-    
+
     >>> parse_locale('zh-CN', sep='-') == ('zh', 'CN', None, None)
     True
-    
+
     If the identifier cannot be parsed into a locale, a `ValueError` exception
     is raised:
-    
+
     >>> parse_locale('not_a_LOCALE_String')
     Traceback (most recent call last):
       ...
     ValueError: 'not_a_LOCALE_String' is not a valid locale identifier
-    
+
     Encoding information and locale modifiers are removed from the identifier:
-    
+
     >>> parse_locale('it_IT@euro') == ('it', 'IT', None, None)
     True
     >>> parse_locale('en_US.UTF-8') == ('en', 'US', None, None)
     True
     >>> parse_locale('de_DE.iso885915@euro') == ('de', 'DE', None, None)
     True
-    
+
     :param identifier: the locale identifier string
     :param sep: character that separates the different components of the locale
                 identifier
@@ -758,7 +758,7 @@ def parse_locale(identifier, sep='_'):
     :rtype: `tuple`
     :raise `ValueError`: if the string does not appear to be a valid locale
                          identifier
-    
+
     :see: `IETF RFC 4646 <http://www.ietf.org/rfc/rfc4646.txt>`_
     """
     if '.' in identifier:
@@ -794,4 +794,3 @@ def parse_locale(identifier, sep='_'):
         raise ValueError('%r is not a valid locale identifier' % str(identifier))
 
     return lang, territory, script, variant
-

@@ -41,7 +41,7 @@ LC_NUMERIC = default_locale('LC_NUMERIC')
 
 def get_currency_name(currency, locale=LC_NUMERIC):
     """Return the name used by the locale for the specified currency.
-    
+
     >>> get_currency_name('USD', 'en_US') == 'US Dollar'
     True
 
@@ -55,7 +55,7 @@ def get_currency_name(currency, locale=LC_NUMERIC):
 
 def get_currency_symbol(currency, locale=LC_NUMERIC):
     """Return the symbol used by the locale for the specified currency.
-    
+
     >>> get_currency_symbol('USD', 'en_US') == '$'
     True
 
@@ -68,10 +68,10 @@ def get_currency_symbol(currency, locale=LC_NUMERIC):
 
 def get_decimal_symbol(locale=LC_NUMERIC):
     """Return the symbol used by the locale to separate decimal fractions.
-    
+
     >>> get_decimal_symbol('en_US') == '.'
     True
-    
+
     :param locale: the `Locale` object or locale identifier
     :return: the decimal symbol
     :rtype: `unicode`
@@ -80,10 +80,10 @@ def get_decimal_symbol(locale=LC_NUMERIC):
 
 def get_plus_sign_symbol(locale=LC_NUMERIC):
     """Return the plus sign symbol used by the current locale.
-    
+
     >>> get_plus_sign_symbol('en_US') == '+'
     True
-    
+
     :param locale: the `Locale` object or locale identifier
     :return: the plus sign symbol
     :rtype: `unicode`
@@ -92,10 +92,10 @@ def get_plus_sign_symbol(locale=LC_NUMERIC):
 
 def get_minus_sign_symbol(locale=LC_NUMERIC):
     """Return the plus sign symbol used by the current locale.
-    
+
     >>> get_minus_sign_symbol('en_US') == '-'
     True
-    
+
     :param locale: the `Locale` object or locale identifier
     :return: the plus sign symbol
     :rtype: `unicode`
@@ -104,7 +104,7 @@ def get_minus_sign_symbol(locale=LC_NUMERIC):
 
 def get_exponential_symbol(locale=LC_NUMERIC):
     """Return the symbol used by the locale to separate mantissa and exponent.
-    
+
     >>> get_exponential_symbol('en_US') == 'E'
     True
 
@@ -116,10 +116,10 @@ def get_exponential_symbol(locale=LC_NUMERIC):
 
 def get_group_symbol(locale=LC_NUMERIC):
     """Return the symbol used by the locale to separate groups of thousands.
-    
+
     >>> get_group_symbol('en_US') == ','
     True
-    
+
     :param locale: the `Locale` object or locale identifier
     :return: the group symbol
     :rtype: `unicode`
@@ -128,12 +128,12 @@ def get_group_symbol(locale=LC_NUMERIC):
 
 def format_number(number, locale=LC_NUMERIC):
     """Return the given number formatted for a specific locale.
-    
+
     >>> format_number(1099, locale='en_US') == '1,099'
     True
     >>> format_number(1099, locale='de_DE') == '1.099'
     True
-    
+
     :param number: the number to format
     :param locale: the `Locale` object or locale identifier
     :return: the formatted number
@@ -144,7 +144,7 @@ def format_number(number, locale=LC_NUMERIC):
 
 def format_decimal(number, format=None, locale=LC_NUMERIC):
     """Return the given decimal number formatted for a specific locale.
-    
+
     >>> format_decimal(1.2345, locale='en_US') == '1.234'
     True
     >>> format_decimal(1.2346, locale='en_US') == '1.235'
@@ -158,12 +158,12 @@ def format_decimal(number, format=None, locale=LC_NUMERIC):
 
     The appropriate thousands grouping and the decimal separator are used for
     each locale:
-    
+
     >>> format_decimal(12345.5, locale='en_US') == '12,345.5'
     True
 
     :param number: the number to format
-    :param format: 
+    :param format:
     :param locale: the `Locale` object or locale identifier
     :return: the formatted decimal number
     :rtype: `unicode`
@@ -176,19 +176,19 @@ def format_decimal(number, format=None, locale=LC_NUMERIC):
 
 def format_currency(number, currency, format=None, locale=LC_NUMERIC):
     """Return formatted currency value.
-    
+
     >>> format_currency(1099.98, 'USD', locale='en_US') == '$1,099.98'
     True
     >>> format_currency(1099.98, 'USD', locale='es_CO') == 'US$\\xa01.099,98'
     True
     >>> format_currency(1099.98, 'EUR', locale='de_DE') == '1.099,98\\xa0\\u20ac'
     True
-    
+
     The pattern can also be specified explicitly:
-    
+
     >>> format_currency(1099.98, 'EUR', '\u00a4\u00a4 #,##0.00', locale='en_US') == 'EUR 1,099.98'
     True
-    
+
     :param number: the number to format
     :param currency: the currency code
     :param locale: the `Locale` object or locale identifier
@@ -203,7 +203,7 @@ def format_currency(number, currency, format=None, locale=LC_NUMERIC):
 
 def format_percent(number, format=None, locale=LC_NUMERIC):
     """Return formatted percent value for a specific locale.
-    
+
     >>> format_percent(0.34, locale='en_US') == '34%'
     True
     >>> format_percent(25.1234, locale='en_US') == '2,512%'
@@ -212,12 +212,12 @@ def format_percent(number, format=None, locale=LC_NUMERIC):
     True
 
     The format pattern can also be specified explicitly:
-    
+
     >>> format_percent(25.1234, '#,##0\u2030', locale='en_US') == '25,123\u2030'
     True
 
     :param number: the percent number to format
-    :param format: 
+    :param format:
     :param locale: the `Locale` object or locale identifier
     :return: the formatted percent number
     :rtype: `unicode`
@@ -230,17 +230,17 @@ def format_percent(number, format=None, locale=LC_NUMERIC):
 
 def format_scientific(number, format=None, locale=LC_NUMERIC):
     """Return value formatted in scientific notation for a specific locale.
-    
+
     >>> format_scientific(10000, locale='en_US') == '1E4'
     True
 
     The format pattern can also be specified explicitly:
-    
+
     >>> format_scientific(1234567, '##0E00', locale='en_US') == '1.23E06'
     True
 
     :param number: the number to format
-    :param format: 
+    :param format:
     :param locale: the `Locale` object or locale identifier
     :return: value formatted in scientific notation.
     :rtype: `unicode`
@@ -258,21 +258,21 @@ class NumberFormatError(ValueError):
 
 def parse_number(string, locale=LC_NUMERIC):
     """Parse localized number string into a long integer.
-    
+
     >>> parse_number('1,099', locale='en_US') == long_type(1099)
     True
     >>> parse_number('1.099', locale='de_DE') == long_type(1099)
     True
 
     When the given string cannot be parsed, an exception is raised:
-    
+
     >>> try:
     ...     parse_number('1.099,98', locale='de')
     ... except NumberFormatError as e:
     ...     msg = str(e)
     >>> msg
     "'1.099,98' is not a valid number"
-    
+
     :param string: the string to parse
     :param locale: the `Locale` object or locale identifier
     :return: the parsed number
@@ -286,14 +286,14 @@ def parse_number(string, locale=LC_NUMERIC):
 
 def parse_decimal(string, locale=LC_NUMERIC):
     """Parse localized decimal string into a decimal.
-    
+
     >>> parse_decimal('1,099.98', locale='en_US')
     Decimal('1099.98')
     >>> parse_decimal('1.099,98', locale='de')
     Decimal('1099.98')
-    
+
     When the given string cannot be parsed, an exception is raised:
-    
+
     >>> try:
     ...     parse_decimal('2,109,998', locale='de')
     ... except NumberFormatError as e:
@@ -331,15 +331,15 @@ def split_number(value):
     if isinstance(value, Decimal):
         # NB can't just do text = str(value) as str repr of Decimal may be
         # in scientific notation, e.g. for small numbers.
-        
+
         sign, digits, exp = value.as_tuple()
         # build list of digits in reverse order, then reverse+join
         # as per http://docs.python.org/library/decimal.html#recipes
         int_part = []
         frac_part = []
-        
+
         digits = list(map(str, digits))
-        
+
         # get figures after decimal point
         for i in range(-exp):
             # add digit if available, else 0
@@ -347,22 +347,22 @@ def split_number(value):
                 frac_part.append(digits.pop())
             else:
                 frac_part.append('0')
-        
+
         # add in some zeroes...
         for i in range(exp):
             int_part.append('0')
-        
+
         # and the rest
         while digits:
             int_part.append(digits.pop())
-        
+
         # if < 1, int_part must be set to '0'
         if len(int_part) == 0:
             int_part = '0',
-        
+
         if sign:
             int_part.append('-')
-        
+
         return ''.join(reversed(int_part)), ''.join(reversed(frac_part))
     text = ('%.9f' % value).rstrip('0')
     if '.' in text:
@@ -488,9 +488,9 @@ def parse_pattern(pattern):
         exp_plus = None
         exp_prec = None
     grouping = parse_grouping(integer)
-    return NumberPattern(pattern, (pos_prefix, neg_prefix), 
+    return NumberPattern(pattern, (pos_prefix, neg_prefix),
                          (pos_suffix, neg_suffix), grouping,
-                         int_prec, frac_prec, 
+                         int_prec, frac_prec,
                          exp_prec, exp_plus)
 
 
@@ -547,8 +547,8 @@ class NumberPattern(object):
                 exp_sign = get_plus_sign_symbol(locale)
             exp = abs(exp)
             number = '%s%s%s%s' % \
-                 (self._format_sigdig(value, self.frac_prec[0], 
-                                     self.frac_prec[1]), 
+                 (self._format_sigdig(value, self.frac_prec[0],
+                                     self.frac_prec[1]),
                   get_exponential_symbol(locale),  exp_sign,
                   self._format_int(str(exp), self.exp_prec[0],
                                    self.exp_prec[1], locale))
@@ -565,7 +565,7 @@ class NumberPattern(object):
             else:
                 number = self._format_int(text, 0, 1000, locale)
         else: # A normal number pattern
-            a, b = split_number(bankersround(abs(value), 
+            a, b = split_number(bankersround(abs(value),
                                              self.frac_prec[1]))
             b = b or '0'
             a = self._format_int(a, self.int_prec[0],
@@ -628,4 +628,3 @@ class NumberPattern(object):
         while len(value) > min and value[-1] == '0':
             value = value[:-1]
         return get_decimal_symbol(locale) + value
-

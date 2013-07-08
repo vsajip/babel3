@@ -19,23 +19,23 @@ from babel import core
 from babel.core import default_locale, Locale, UnknownLocaleError
 
 class DefaultLocaleTest(unittest.TestCase):
-    
+
     def setUp(self):
         self._old_locale_settings = self._current_locale_settings()
-    
+
     def tearDown(self):
         self._set_locale_settings(self._old_locale_settings)
-    
+
     def _current_locale_settings(self):
         settings = {}
         for name in ('LANGUAGE', 'LC_ALL', 'LC_CTYPE', 'LANG'):
             settings[name] = os.environ[name]
         return settings
-    
+
     def _set_locale_settings(self, settings):
         for name, value in settings.items():
             os.environ[name] = value
-    
+
     def test_ignore_invalid_locales_in_lc_ctype(self):
         # This is a regression test specifically for a bad LC_CTYPE setting on
         # MacOS X 10.6 (#200)

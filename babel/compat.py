@@ -40,7 +40,7 @@ if sys.version_info[0] < 3:
 
     from itertools import izip
     from ConfigParser import RawConfigParser
-    
+
     xrange = xrange
 
     from gettext import GNUTranslations

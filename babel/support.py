@@ -38,7 +38,7 @@ __docformat__ = 'restructuredtext en'
 class Format(object):
     """Wrapper class providing the various date and number formatting functions
     bound to a specific locale and time-zone.
-    
+
     >>> fmt = Format('en_US', UTC)
     >>> fmt.date(date(2007, 4, 1)) == 'Apr 1, 2007'
     True
@@ -48,7 +48,7 @@ class Format(object):
 
     def __init__(self, locale, tzinfo=None):
         """Initialize the formatter.
-        
+
         :param locale: the locale identifier or `Locale` instance
         :param tzinfo: the time-zone info (a `tzinfo` instance or `None`)
         """
@@ -57,23 +57,23 @@ class Format(object):
 
     def date(self, date=None, format='medium'):
         """Return a date formatted according to the given pattern.
-        
+
         >>> fmt = Format('en_US')
         >>> fmt.date(date(2007, 4, 1)) == 'Apr 1, 2007'
         True
-        
+
         :see: `babel.dates.format_date`
         """
         return format_date(date, format, locale=self.locale)
 
     def datetime(self, datetime=None, format='medium'):
         """Return a date and time formatted according to the given pattern.
-        
+
         >>> from pytz import timezone
         >>> fmt = Format('en_US', tzinfo=timezone('US/Eastern'))
         >>> fmt.datetime(datetime(2007, 4, 1, 15, 30)) == 'Apr 1, 2007 11:30:00 AM'
         True
-        
+
         :see: `babel.dates.format_datetime`
         """
         return format_datetime(datetime, format, tzinfo=self.tzinfo,
@@ -81,23 +81,23 @@ class Format(object):
 
     def time(self, time=None, format='medium'):
         """Return a time formatted according to the given pattern.
-        
+
         >>> from pytz import timezone
         >>> fmt = Format('en_US', tzinfo=timezone('US/Eastern'))
         >>> fmt.time(datetime(2007, 4, 1, 15, 30)) == '11:30:00 AM'
         True
-        
+
         :see: `babel.dates.format_time`
         """
         return format_time(time, format, tzinfo=self.tzinfo, locale=self.locale)
 
     def timedelta(self, delta, granularity='second', threshold=.85):
         """Return a time delta according to the rules of the given locale.
-        
+
         >>> fmt = Format('en_US')
         >>> fmt.timedelta(timedelta(weeks=11)) == '3 mths'
         True
-        
+
         :see: `babel.dates.format_timedelta`
         """
         return format_timedelta(delta, granularity=granularity,
@@ -105,47 +105,47 @@ class Format(object):
 
     def number(self, number):
         """Return an integer number formatted for the locale.
-        
+
         >>> fmt = Format('en_US')
         >>> fmt.number(1099) == '1,099'
         True
-        
+
         :see: `babel.numbers.format_number`
         """
         return format_number(number, locale=self.locale)
 
     def decimal(self, number, format=None):
         """Return a decimal number formatted for the locale.
-        
+
         >>> fmt = Format('en_US')
         >>> fmt.decimal(1.2345) == '1.234'
         True
-        
+
         :see: `babel.numbers.format_decimal`
         """
         return format_decimal(number, format, locale=self.locale)
 
     def currency(self, number, currency):
         """Return a number in the given currency formatted for the locale.
-        
+
         :see: `babel.numbers.format_currency`
         """
         return format_currency(number, currency, locale=self.locale)
 
     def percent(self, number, format=None):
         """Return a number formatted as percentage for the locale.
-        
+
         >>> fmt = Format('en_US')
         >>> fmt.percent(0.34) == '34%'
         True
-        
+
         :see: `babel.numbers.format_percent`
         """
         return format_percent(number, format, locale=self.locale)
 
     def scientific(self, number):
         """Return a number formatted using scientific notation for the locale.
-        
+
         :see: `babel.numbers.format_scientific`
         """
         return format_scientific(number, locale=self.locale)
@@ -154,7 +154,7 @@ class Format(object):
 class LazyProxy(object):
     """Class for proxy objects that delegate to a specified function to evaluate
     the actual object.
-    
+
     >>> def greeting(name='world'):
     ...     return 'Hello, %s!' % name
     >>> lazy_greeting = LazyProxy(greeting, name='Joe')
@@ -164,16 +164,16 @@ class LazyProxy(object):
     True
     >>> '(%s)' % lazy_greeting == '(Hello, Joe!)'
     True
-    
+
     This can be used, for example, to implement lazy translation functions that
     delay the actual translation until the string is actually used. The
     rationale for such behavior is that the locale of the user may not always
     be available. In web applications, you only know the locale when processing
     a request.
-    
+
     The proxy implementation attempts to be as complete as possible, so that
     the lazy objects should mostly work as expected, for example for sorting:
-    
+
     >>> greetings = [
     ...     LazyProxy(greeting, 'world'),
     ...     LazyProxy(greeting, 'Joe'),
@@ -287,7 +287,7 @@ class LazyProxy(object):
         self.value[key] = value
 
 
-class NullTranslations(gettext.NullTranslations, object): 
+class NullTranslations(gettext.NullTranslations, object):
 
     DEFAULT_DOMAIN = None
 
@@ -313,13 +313,13 @@ class NullTranslations(gettext.NullTranslations, object):
         domain.
         """
         return self._domains.get(domain, self).gettext(message)
-    
+
     def ldgettext(self, domain, message):
-        """Like ``lgettext()``, but look the message up in the specified 
+        """Like ``lgettext()``, but look the message up in the specified
         domain.
-        """ 
+        """
         return self._domains.get(domain, self).lgettext(message)
-    
+
     def udgettext(self, domain, message):
         """Like ``ugettext()``, but look the message up in the specified
         domain.
@@ -327,19 +327,19 @@ class NullTranslations(gettext.NullTranslations, object):
         return self._domains.get(domain, self).ugettext(message)
     # backward compatibility with 0.9
     dugettext = udgettext
-    
+
     def dngettext(self, domain, singular, plural, num):
         """Like ``ngettext()``, but look the message up in the specified
         domain.
         """
         return self._domains.get(domain, self).ngettext(singular, plural, num)
-    
+
     def ldngettext(self, domain, singular, plural, num):
         """Like ``lngettext()``, but look the message up in the specified
         domain.
         """
         return self._domains.get(domain, self).lngettext(singular, plural, num)
-    
+
     def udngettext(self, domain, singular, plural, num):
         """Like ``ungettext()`` but look the message up in the specified
         domain.
@@ -350,7 +350,7 @@ class NullTranslations(gettext.NullTranslations, object):
 
     # Most of the downwards code, until it get's included in stdlib, from:
     #    http://bugs.python.org/file10036/gettext-pgettext.patch
-    #    
+    #
     # The encoding of a msgctxt and a msgid in a .mo file is
     # msgctxt + "\x04" + msgid (gettext version >= 0.15)
     CONTEXT_ENCODING = '%s\x04%s'
@@ -398,7 +398,7 @@ class NullTranslations(gettext.NullTranslations, object):
         message id for purposes of lookup in the catalog, while `num` is used to
         determine which plural form to use.  The returned message string is an
         8-bit string encoded with the catalog's charset encoding, if known.
-        
+
         If the message id for `context` is not found in the catalog, and a
         fallback is specified, the request is forwarded to the fallback's
         ``npgettext()`` method.  Otherwise, when ``num`` is 1 ``singular`` is
@@ -460,7 +460,7 @@ class NullTranslations(gettext.NullTranslations, object):
         message id for purposes of lookup in the catalog, while `num` is used to
         determine which plural form to use.  The returned message string is a
         Unicode string.
-        
+
         If the message id for `context` is not found in the catalog, and a
         fallback is specified, the request is forwarded to the fallback's
         ``unpgettext()`` method.  Otherwise, when `num` is 1 `singular` is
@@ -483,7 +483,7 @@ class NullTranslations(gettext.NullTranslations, object):
         `domain`.
         """
         return self._domains.get(domain, self).pgettext(context, message)
-    
+
     def udpgettext(self, domain, context, message):
         """Like `upgettext()`, but look the message up in the specified
         `domain`.
@@ -505,7 +505,7 @@ class NullTranslations(gettext.NullTranslations, object):
         """
         return self._domains.get(domain, self).npgettext(context, singular,
                                                          plural, num)
-        
+
     def udnpgettext(self, domain, context, singular, plural, num):
         """Like ``unpgettext``, but look the message up in the specified
         `domain`.
@@ -560,7 +560,8 @@ class Translations(NullTranslations, gettext.GNUTranslations):
         filename = gettext.find(domain, dirname, locales)
         if not filename:
             return NullTranslations()
-        return cls(fp=open(filename, 'rb'), domain=domain)
+        with open(filename, 'rb') as fp:
+            return cls(fp=fp, domain=domain)
 
     def __repr__(self):
         return '<%s: "%s">' % (type(self).__name__,
@@ -613,5 +614,3 @@ class Translations(NullTranslations, gettext.GNUTranslations):
                 self.files.extend(translations.files)
 
         return self
-
-

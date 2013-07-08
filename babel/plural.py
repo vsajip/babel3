@@ -89,7 +89,7 @@ class PluralRule(object):
     @property
     def rules(self):
         """The `PluralRule` as a dict of unicode plural rules.
-        
+
         >>> rule = PluralRule({'one': 'n is 1'})
         >>> rule.rules
         {'one': 'n is 1'}
@@ -278,6 +278,7 @@ class _Parser(object):
         (None, re.compile(r'\s+(?u)')),
         ('word', re.compile(r'\b(and|or|is|(?:with)?in|not|mod|n)\b')),
         ('value', re.compile(r'\d+')),
+        ('comma', re.compile(r',')),
         ('ellipsis', re.compile(r'\.\.'))
     ]
 

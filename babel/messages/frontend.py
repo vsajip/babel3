@@ -1134,7 +1134,7 @@ class CommandLineInterface(object):
                 try:
                     write_po(tmpfile, catalog,
                              ignore_obsolete=options.ignore_obsolete,
-                             include_previous=options.previous, 
+                             include_previous=options.previous,
                              width=options.width)
                 finally:
                     tmpfile.close()
@@ -1164,7 +1164,7 @@ def parse_mapping(fileobj, filename=None):
     >>> buf = StringIO('''
     ... [extractors]
     ... custom = mypackage.module:myfunc
-    ... 
+    ...
     ... # Python source files
     ... [python: **.py]
     ...
@@ -1174,7 +1174,7 @@ def parse_mapping(fileobj, filename=None):
     ... [genshi: **/templates/**.txt]
     ... template_class = genshi.template:TextTemplate
     ... encoding = latin-1
-    ... 
+    ...
     ... # Some custom extractor
     ... [custom: **/custom/*.*]
     ... ''')
@@ -1266,4 +1266,3 @@ def parse_keywords(strings=[]):
 
 if __name__ == '__main__':
     main()
-

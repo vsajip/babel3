@@ -124,10 +124,10 @@ def _validate_format(format, alternative):
                                            'and named placeholders')
         return bool(positional)
 
-    a, b = tuple(map(_parse, (format, alternative)))
+    a, b = map(_parse, (format, alternative))
 
     # now check if both strings are positional or named
-    a_positional, b_positional = tuple(map(_check_positional, (a, b)))
+    a_positional, b_positional = map(_check_positional, (a, b))
     if a_positional and not b_positional and not b:
         raise TranslationError('placeholders are incompatible')
     elif a_positional != b_positional:

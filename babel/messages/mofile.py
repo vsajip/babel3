@@ -35,11 +35,11 @@ BE_MAGIC = long_type(0xde120495)
 def read_mo(fileobj):
     """Read a binary MO file from the given file-like object and return a
     corresponding `Catalog` object.
-    
+
     :param fileobj: the file-like object to read the MO file from
     :return: a catalog object representing the parsed MO file
     :rtype: `Catalog`
-    
+
     :note: The implementation of this function is heavily based on the
            ``GNUTranslations._parse`` method of the ``gettext`` module in the
            standard library.
@@ -120,10 +120,10 @@ def read_mo(fileobj):
 def write_mo(fileobj, catalog, use_fuzzy=False):
     """Write a catalog to the specified file-like object using the GNU MO file
     format.
-    
+
     >>> from babel.messages import Catalog
     >>> from babel.compat import BytesIO, GNUTranslations
-    
+
     >>> catalog = Catalog(locale='en_US')
     >>> catalog.add('foo', 'Voh')
     <Message ...>
@@ -153,7 +153,7 @@ def write_mo(fileobj, catalog, use_fuzzy=False):
     True
     >>> translations.ugettext('Fuzzes') == 'Fuzzes'
     True
-    
+
     :param fileobj: the file-like object to write to
     :param catalog: the `Catalog` instance
     :param use_fuzzy: whether translations marked as "fuzzy" should be included

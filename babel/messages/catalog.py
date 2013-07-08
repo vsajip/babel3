@@ -93,7 +93,7 @@ class Message(object):
 
     def __cmp__(self, obj):
         """Compare Messages, taking into account plural ids"""
-        
+
         def cmp(a, b):
             return ((a > b) - (a < b))
 
@@ -194,7 +194,7 @@ class Message(object):
         ids = self.id
         if not isinstance(ids, (list, tuple)):
             ids = [ids]
-        return bool([_f for _f in [PYTHON_FORMAT.search(id) for id in ids] if _f])
+        return any(PYTHON_FORMAT.search(id) for id in ids)
 
 
 class TranslationError(Exception):
@@ -235,7 +235,7 @@ class Catalog(object):
         :param revision_date: the date the catalog was revised
         :param last_translator: the name and email of the last translator
         :param language_team: the name and email of the language team
-        :param charset: the encoding to use in the output
+        :param charset: the encoding to use in the output (defaults to utf-8)
         :param fuzzy: the fuzzy bit on the catalog header
         """
         self.domain = domain #: The message domain
@@ -508,7 +508,7 @@ class Catalog(object):
         >>> Catalog(locale='ga').plural_expr
         '(n==1 ? 0 : n==2 ? 1 : 2)'
 
-        :type: `basestring`"""
+        :type: `string_types`"""
         if self._plural_expr is None:
             expr = '(n != 1)'
             if self.locale:
@@ -695,7 +695,7 @@ class Catalog(object):
 
     def delete(self, id, context=None):
         """Delete the message with the specified ID and context.
-        
+
         :param id: the message ID
         :param context: the message context, or ``None`` for no context
         """
@@ -846,4 +846,3 @@ class Catalog(object):
         if context is not None:
             key = (key, context)
         return key
-
